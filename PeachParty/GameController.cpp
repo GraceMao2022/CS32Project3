@@ -389,9 +389,10 @@ void GameController::displayGamePlay()
 	for (int i = GraphObject::NUM_DEPTHS - 1; i >= 0; --i)
 	{
 		std::set<GraphObject*> &graphObjects = GraphObject::getGraphObjects(i);
-
+        //cerr << graphObjects.size() << endl;
 		for (auto it = graphObjects.begin(); it != graphObjects.end(); it++)
 		{
+            cerr << "inner loop" << endl;
 			GraphObject* cur = *it;
 			if (cur->isVisible())
 			{
@@ -403,7 +404,7 @@ void GameController::displayGamePlay()
 
 				int angle = cur->getDirection();
 				int imageID = cur->getID();
-
+                cerr << "plot sprite" << endl;
 				m_spriteManager.plotSprite(imageID, cur->getAnimationNumber() % m_spriteManager.getNumFrames(imageID), gx, gy, gz, angle, cur->getSize());
 			}
 		}

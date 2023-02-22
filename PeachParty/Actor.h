@@ -2,18 +2,17 @@
 #define ACTOR_H_
 
 #include "GraphObject.h"
+#include "StudentWorld.h"
 
 // Students:  Add code to this file, Actor.cpp, StudentWorld.h, and StudentWorld.cpp
 
-class BaseActor: public GraphObject
+class Actor: public GraphObject
 {
-    //GraphObject(int imageID, int startX, int startY, int dir = right, int depth = 0, double size = 1.0)
-    public:
-    BaseActor(int imageID, int startX, int startY):GraphObject(imageID, startX, startY)
-    {
-        
-    }
+public:
+    Actor(StudentWorld* sw, int imgID, int x, int y);
     virtual void doSomething() = 0;
+private:
+    StudentWorld* m_world;
 };
 
 class PlayerAvatar
@@ -21,9 +20,13 @@ class PlayerAvatar
     
 };
 
-class CoinSquare
+class CoinSquare: public Actor
 {
-    
+public:
+    CoinSquare(StudentWorld* sw, int x, int y);
+    void doSomething(){}
+private:
+    int coins;
 };
 
 #endif // ACTOR_H_

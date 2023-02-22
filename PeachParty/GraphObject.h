@@ -153,11 +153,15 @@ class GraphObject
 
 	static std::set<GraphObject*>& getGraphObjects(int layer)
 	{
+        //std::cerr << "getGraphObjects" << std::endl;
 		static std::set<GraphObject*> graphObjects[NUM_DEPTHS];
 		if (layer < NUM_DEPTHS)
 			return graphObjects[layer];
 		else
-			return graphObjects[0];  // empty
+        {
+            std::cerr << "Empty" << std::endl;
+            return graphObjects[0];
+        }// empty
 	}
 
 	void increaseAnimationNumber()
