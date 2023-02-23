@@ -9,10 +9,14 @@
 class Actor: public GraphObject
 {
 public:
-    Actor(StudentWorld* sw, int imgID, int x, int y);
+    Actor(StudentWorld* sw, int imgID, int x, int y, int dir, int depth, double size);
+    virtual ~Actor(){}// delete m_world; }
     virtual void doSomething() = 0;
+    bool getIsAlive() { return isAlive; }
+    
 private:
     StudentWorld* m_world;
+    bool isAlive;
 };
 
 class PlayerAvatar
@@ -24,9 +28,11 @@ class CoinSquare: public Actor
 {
 public:
     CoinSquare(StudentWorld* sw, int x, int y);
+    ~CoinSquare(){}
     void doSomething(){}
 private:
     int coins;
+    
 };
 
 #endif // ACTOR_H_
