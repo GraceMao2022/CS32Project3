@@ -104,23 +104,29 @@ bool MovingActor::canMove(int dir, int dist, int x, int y)
 PlayerAvatar::PlayerAvatar(StudentWorld* sw, int imgID, int x, int y, int playerNum):MovingActor(sw, imgID, x, y, right, 0, 1.0)
 {
     playerNumber = playerNum;
-    state = "waiting to roll";
+    setState("waiting to roll");
+    coins = 0;
+    stars = 0;
 }
 
 void PlayerAvatar::doSomething()
 {
-    if(state == "waiting to roll")
+    if(getState() == "waiting to roll")
     {
-        if(getWorld()->getAction(playerNumber) == ACTION_ROLL)
+        switch (getWorld()->getAction(playerNumber))
         {
-            int die_roll = randInt(1, 10);
-            setTicksToMove(die_roll * 8);
-            state = "walking";
+            case ACTION_NONE:
+                return;
+            case ACTION_ROLL:
+            {
+                int die_roll = randInt(1, 10);
+                setTicksToMove(die_roll * 8);
+                setState("walking");
+                break;
+            }
         }
-        else
-            return;
     }
-    if(state == "walking")
+    if(getState() == "walking")
     {
         getNewDirection(getX(), getY());
         if(getWalkDir() == left)
@@ -132,17 +138,66 @@ void PlayerAvatar::doSomething()
         decTicksToMove();
        
         if(getTicksToMove() == 0)
-           state = "waiting to roll";
+           setState("waiting to roll");
     }
 }
 
-CoinSquare::CoinSquare(StudentWorld* sw, int imgID, int x, int y):Actor(sw, imgID, x, y, right, 1, 1.0)
+CoinSquare::CoinSquare(StudentWorld* sw, int imgID, int x, int y, bool isBlue):Actor(sw, imgID, x, y, right, 1, 1.0)
 {
-    coinValue = 3;
+    if(isBlue)
+        coinValue = 3;
+    else
+        coinValue = -3;
+    
+    peachIsNew = false;
+    yoshiIsNew = false;
 }
 
 void CoinSquare::doSomething()
 {
     if(!isAlive())
         return;
+   if(getWorld()->getPeach()->getX() == getX() && getWorld()->getPeach()->getY() == getY())
+    {
+        if(getWorld()->getPeach()->getState() == "waiting to roll" && peachIsNew)
+        {
+            getWorld()->getPeach()->setCoins(getWorld()->getPeach()->getCoins()+coinValue);
+            //if subtracted coins past 0
+            if(getWorld()->getPeach()->getCoins() < 0)
+                getWorld()->getPeach()->setCoins(0);
+            
+            //play sound give coin
+            if(coinValue > 0)
+                getWorld()->playSound(SOUND_GIVE_COIN);
+            //play sound take coin
+            else if(coinValue < 0)
+                getWorld()->playSound(SOUND_TAKE_COIN);
+            
+            peachIsNew = false;
+        }
+    }
+    else
+        peachIsNew = true;
+    
+    if(getWorld()->getYoshi()->getX() == getX() && getWorld()->getYoshi()->getY() == getY())
+     {
+         if(getWorld()->getYoshi()->getState() == "waiting to roll" && yoshiIsNew)
+         {
+             getWorld()->getYoshi()->setCoins(getWorld()->getYoshi()->getCoins()+coinValue);
+             //if subtracted coins past 0
+             if(getWorld()->getYoshi()->getCoins() < 0)
+                 getWorld()->getYoshi()->setCoins(0);
+             
+             //play sound give coin
+             if(coinValue > 0)
+                 getWorld()->playSound(SOUND_GIVE_COIN);
+             //play sound take coin
+             else if(coinValue < 0)
+                 getWorld()->playSound(SOUND_TAKE_COIN);
+             
+             yoshiIsNew = false;
+         }
+     }
+     else
+         yoshiIsNew = true;
 }

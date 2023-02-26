@@ -7,7 +7,7 @@
 #include <vector>
 
 class Actor;
-
+class PlayerAvatar;
 // Students:  Add code to this file, StudentWorld.cpp, Actor.h, and Actor.cpp
 
 class StudentWorld : public GameWorld
@@ -19,11 +19,14 @@ class StudentWorld : public GameWorld
         virtual int move();
         virtual void cleanUp();
         Board::GridEntry getActorAt(int x, int y);
+        PlayerAvatar* getPeach() { return peach; }
+        PlayerAvatar* getYoshi() { return yoshi; }
 
     private:
     std::string getBoardFile();
     void populateBoard(Board bd);
-    Actor* peach;
+    PlayerAvatar* peach;
+    PlayerAvatar* yoshi;
     Board board;
     std::vector<Actor*> actors;
 };

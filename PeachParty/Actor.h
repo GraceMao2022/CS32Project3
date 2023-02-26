@@ -26,6 +26,7 @@ class MovingActor: public Actor
 public:
     MovingActor(StudentWorld* sw, int imgID, int x, int y, int dir, int depth, double size);
     virtual ~MovingActor(){}
+    std::string getState() { return state; }
     //virtual void doSomething();
 protected:
     int getTicksToMove() { return ticks_to_move; }
@@ -33,7 +34,6 @@ protected:
     void decTicksToMove() { ticks_to_move--; }
     int getWalkDir() { return walkDir; }
     void setWalkDir(int dir) { walkDir = dir; }
-    std::string getState() { return state; }
     void setState(std::string newState) { state = newState; }
     void getNewDirection(int x, int y);
 private:
@@ -50,19 +50,24 @@ public:
     ~PlayerAvatar(){}
     void doSomething();
     bool isPlayerOne() { return playerNumber == 1; }
+    int getCoins() { return coins; }
+    void setCoins(int amt) { coins = amt; }
 private:
     int playerNumber;
-    std::string state;
+    int coins;
+    int stars;
 };
 
 class CoinSquare: public Actor
 {
 public:
-    CoinSquare(StudentWorld* sw, int imgID, int x, int y);
+    CoinSquare(StudentWorld* sw, int imgID, int x, int y, bool isBlue);
     ~CoinSquare(){}
     void doSomething();
 private:
     int coinValue;
+    bool peachIsNew;
+    bool yoshiIsNew;
     
 };
 

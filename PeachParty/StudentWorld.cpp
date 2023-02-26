@@ -119,17 +119,23 @@ void StudentWorld::populateBoard(Board bd)
                 case Board::player:
                 {
                     peach = new PlayerAvatar(this, IID_PEACH, SPRITE_WIDTH*i, SPRITE_HEIGHT*j, 1);
-                    Actor* blueCoin = new CoinSquare(this, IID_BLUE_COIN_SQUARE, SPRITE_WIDTH*i, SPRITE_HEIGHT*j);
+                    
+                    yoshi = new PlayerAvatar(this, IID_YOSHI, SPRITE_WIDTH*i, SPRITE_HEIGHT*j, 2);
+                    
+                    Actor* blueCoin = new CoinSquare(this, IID_BLUE_COIN_SQUARE, SPRITE_WIDTH*i, SPRITE_HEIGHT*j, true);
                     actors.push_back(blueCoin);
                     break;
                 }
                 //cout << "Location 5,10 has Peach & Yoshi and a blue coin square\n";
                 case Board::red_coin_square:
-                //cout << "Location 5,10 has a red coin square\n";
-                break;
+                {
+                    Actor* redCoin = new CoinSquare(this, IID_RED_COIN_SQUARE, SPRITE_WIDTH*i, SPRITE_HEIGHT*j, false);
+                    actors.push_back(redCoin);
+                    break;
+                }
                 case Board::blue_coin_square:
                 {
-                    Actor* blueCoin = new CoinSquare(this, IID_BLUE_COIN_SQUARE, SPRITE_WIDTH*i, SPRITE_HEIGHT*j);
+                    Actor* blueCoin = new CoinSquare(this, IID_BLUE_COIN_SQUARE, SPRITE_WIDTH*i, SPRITE_HEIGHT*j, true);
                     actors.push_back(blueCoin);
                     break;
                 }
@@ -149,6 +155,7 @@ int StudentWorld::move()
     //if (timeRemaining() <= 0)
 		//return GWSTATUS_NOT_IMPLEMENTED;
     peach->doSomething();
+    yoshi->doSomething();
     for(int i = 0; i < actors.size(); i++)
     {
         actors[i]->doSomething();
@@ -170,6 +177,9 @@ void StudentWorld::cleanUp()
     
     delete peach;
     peach = nullptr;
+    
+    delete yoshi;
+    yoshi = nullptr;
 }
 
 Board::GridEntry StudentWorld::getActorAt(int x, int y)
