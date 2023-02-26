@@ -12,7 +12,7 @@ public:
     Actor(StudentWorld* sw, int imgID, int x, int y, int dir, int depth, double size);
     virtual ~Actor(){}
     virtual void doSomething() = 0;
-    bool isAlive() { return alive; }
+    bool isAlive() const { return alive; }
     
 protected:
     StudentWorld* getWorld() { return m_world; }
@@ -26,13 +26,13 @@ class MovingActor: public Actor
 public:
     MovingActor(StudentWorld* sw, int imgID, int x, int y, int dir, int depth, double size);
     virtual ~MovingActor(){}
-    std::string getState() { return state; }
+    std::string getState() const { return state; }
     //virtual void doSomething();
 protected:
-    int getTicksToMove() { return ticks_to_move; }
+    int getTicksToMove() const { return ticks_to_move; }
     void setTicksToMove(int ticks) { ticks_to_move = ticks; }
     void decTicksToMove() { ticks_to_move--; }
-    int getWalkDir() { return walkDir; }
+    int getWalkDir() const { return walkDir; }
     void setWalkDir(int dir) { walkDir = dir; }
     void setState(std::string newState) { state = newState; }
     void getNewDirection(int x, int y);
@@ -49,8 +49,8 @@ public:
     PlayerAvatar(StudentWorld* sw, int imgID, int x, int y, int playerNum);
     ~PlayerAvatar(){}
     void doSomething();
-    bool isPlayerOne() { return playerNumber == 1; }
-    int getCoins() { return coins; }
+    bool isPlayerOne() const { return playerNumber == 1; }
+    int getCoins() const { return coins; }
     void setCoins(int amt) { coins = amt; }
 private:
     int playerNumber;

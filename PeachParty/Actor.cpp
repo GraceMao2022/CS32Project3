@@ -115,8 +115,6 @@ void PlayerAvatar::doSomething()
     {
         switch (getWorld()->getAction(playerNumber))
         {
-            case ACTION_NONE:
-                return;
             case ACTION_ROLL:
             {
                 int die_roll = randInt(1, 10);
@@ -124,6 +122,8 @@ void PlayerAvatar::doSomething()
                 setState("walking");
                 break;
             }
+            default:
+                return;
         }
     }
     if(getState() == "walking")
