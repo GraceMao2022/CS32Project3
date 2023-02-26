@@ -14,15 +14,17 @@ class StudentWorld : public GameWorld
 {
     public:
         StudentWorld(std::string assetPath);
+        ~StudentWorld();
         virtual int init();
         virtual int move();
         virtual void cleanUp();
-   
+        Board::GridEntry getActorAt(int x, int y);
 
     private:
     std::string getBoardFile();
     void populateBoard(Board bd);
     Actor* peach;
+    Board board;
     std::vector<Actor*> actors;
 };
 

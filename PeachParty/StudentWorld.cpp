@@ -15,7 +15,12 @@ GameWorld* createStudentWorld(string assetPath)
 StudentWorld::StudentWorld(string assetPath)
 : GameWorld(assetPath)
 {
-   //init();
+   
+}
+
+StudentWorld::~StudentWorld()
+{
+    cleanUp();
 }
 
 int StudentWorld::init()
@@ -23,6 +28,7 @@ int StudentWorld::init()
     string boardFile = getBoardFile();
     Board bd;
     Board::LoadResult result = bd.loadBoard(boardFile);
+    board = bd;
     
     if (result == Board::load_fail_file_not_found)
         cerr << "Could not find board01.txt data file\n";
@@ -30,10 +36,10 @@ int StudentWorld::init()
         cerr << "Your board was improperly formatted\n";
     else if (result == Board::load_success) {
         cerr << "Successfully loaded board\n";
-        populateBoard(bd);
+        populateBoard(board);
     }
    
-	startCountdownTimer(5);
+	startCountdownTimer(99);
     return GWSTATUS_CONTINUE_GAME;
 }
 
@@ -111,16 +117,20 @@ void StudentWorld::populateBoard(Board bd)
                 //cout << "Location 5,10 has a Bowser and a blue coin square\n";
                 break;
                 case Board::player:
+                {
+                    peach = new PlayerAvatar(this, IID_PEACH, SPRITE_WIDTH*i, SPRITE_HEIGHT*j, 1);
+                    Actor* blueCoin = new CoinSquare(this, IID_BLUE_COIN_SQUARE, SPRITE_WIDTH*i, SPRITE_HEIGHT*j);
+                    actors.push_back(blueCoin);
+                    break;
+                }
                 //cout << "Location 5,10 has Peach & Yoshi and a blue coin square\n";
-                break;
                 case Board::red_coin_square:
                 //cout << "Location 5,10 has a red coin square\n";
                 break;
                 case Board::blue_coin_square:
                 {
-                    Actor* blueCoin = new CoinSquare(this, SPRITE_WIDTH*i, SPRITE_HEIGHT*j);
+                    Actor* blueCoin = new CoinSquare(this, IID_BLUE_COIN_SQUARE, SPRITE_WIDTH*i, SPRITE_HEIGHT*j);
                     actors.push_back(blueCoin);
-                    cerr << actors.size() << endl;
                     break;
                 }
             // etc…
@@ -138,24 +148,32 @@ int StudentWorld::move()
     
     //if (timeRemaining() <= 0)
 		//return GWSTATUS_NOT_IMPLEMENTED;
+    peach->doSomething();
+    for(int i = 0; i < actors.size(); i++)
+    {
+        actors[i]->doSomething();
+    }
     
-    if (timeRemaining() <= 0)
-        return GWSTATUS_PEACH_WON;
+   // if (timeRemaining() <= 0)
+     //   return GWSTATUS_PEACH_WON;
     
 	return GWSTATUS_CONTINUE_GAME;
 }
 
 void StudentWorld::cleanUp()
 {
-    delete peach;
-    
     while(!actors.empty())
     {
-        //cerr << actors.size() << endl;
         delete actors[actors.size() - 1];
-        //cerr << "hi" << endl;
         actors.pop_back();
-        //cerr << "bye" << endl;
-        //cerr << actors.size() << endl;
     }
+    
+    delete peach;
+    peach = nullptr;
+}
+
+Board::GridEntry StudentWorld::getActorAt(int x, int y)
+{
+    Board::GridEntry ge = board.getContentsOf(x, y);
+    return ge;
 }

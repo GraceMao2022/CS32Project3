@@ -10,28 +10,59 @@ class Actor: public GraphObject
 {
 public:
     Actor(StudentWorld* sw, int imgID, int x, int y, int dir, int depth, double size);
-    virtual ~Actor(){}// delete m_world; }
+    virtual ~Actor(){}
     virtual void doSomething() = 0;
-    bool getIsAlive() { return isAlive; }
+    bool isAlive() { return alive; }
     
+protected:
+    StudentWorld* getWorld() { return m_world; }
 private:
     StudentWorld* m_world;
-    bool isAlive;
+    bool alive;
 };
 
-class PlayerAvatar
+class MovingActor: public Actor
 {
-    
+public:
+    MovingActor(StudentWorld* sw, int imgID, int x, int y, int dir, int depth, double size);
+    virtual ~MovingActor(){}
+    //virtual void doSomething();
+protected:
+    int getTicksToMove() { return ticks_to_move; }
+    void setTicksToMove(int ticks) { ticks_to_move = ticks; }
+    void decTicksToMove() { ticks_to_move--; }
+    int getWalkDir() { return walkDir; }
+    void setWalkDir(int dir) { walkDir = dir; }
+    std::string getState() { return state; }
+    void setState(std::string newState) { state = newState; }
+    void getNewDirection(int x, int y);
+private:
+    int ticks_to_move;
+    int walkDir;
+    std::string state;
+    bool canMove(int dir, int dist, int x, int y);
+};
+
+class PlayerAvatar: public MovingActor
+{
+public:
+    PlayerAvatar(StudentWorld* sw, int imgID, int x, int y, int playerNum);
+    ~PlayerAvatar(){}
+    void doSomething();
+    bool isPlayerOne() { return playerNumber == 1; }
+private:
+    int playerNumber;
+    std::string state;
 };
 
 class CoinSquare: public Actor
 {
 public:
-    CoinSquare(StudentWorld* sw, int x, int y);
+    CoinSquare(StudentWorld* sw, int imgID, int x, int y);
     ~CoinSquare(){}
-    void doSomething(){}
+    void doSomething();
 private:
-    int coins;
+    int coinValue;
     
 };
 
