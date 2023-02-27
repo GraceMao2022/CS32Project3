@@ -53,6 +53,8 @@ public:
     bool isPlayerOne() const { return playerNumber == 1; }
     int getCoins() const { return coins; }
     void setCoins(int amt) { coins = amt; }
+    int getStars() const { return stars; }
+    void setStars(int amt) { stars = amt; }
 private:
     int playerNumber;
     int coins;
@@ -62,7 +64,7 @@ private:
 class Square: public Actor
 {
 public:
-    Square(StudentWorld* sw, int imgID, int x, int y);
+    Square(StudentWorld* sw, int imgID, int x, int y, int dir);
     virtual ~Square();
 protected:
     bool isPeachNew() { return peachIsNew; }
