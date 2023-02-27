@@ -101,6 +101,32 @@ bool MovingActor::canMove(int dir, int dist, int x, int y)
     }
 }
 
+void MovingActor::updateSpriteDirection()
+{
+    if(walkDir == left)
+        setDirection(left);
+    else
+        setDirection(right);
+}
+
+// finds all possible directions the actor can move and chooses one randomly
+int MovingActor::chooseRandomWalkDir()
+{
+    std::vector<int> possibleDirections; //stores all possible directions actor can move to
+    if(canMove(right, 2, getX(), getY()))
+        possibleDirections.push_back(right);
+    if(canMove(left, 2, getX(), getY()))
+        possibleDirections.push_back(left);
+    if(canMove(up, 2, getX(), getY()))
+        possibleDirections.push_back(up);
+    if(canMove(down, 2, getX(), getY()))
+        possibleDirections.push_back(down);
+    
+    int randDir = randInt(0, (int)possibleDirections.size() - 1);
+    
+    return possibleDirections[randDir];
+}
+
 PlayerAvatar::PlayerAvatar(StudentWorld* sw, int imgID, int x, int y, int playerNum):MovingActor(sw, imgID, x, y, right, 0, 1.0)
 {
     playerNumber = playerNum;
@@ -113,6 +139,11 @@ void PlayerAvatar::doSomething()
 {
     if(getState() == "waiting to roll")
     {
+        if(!canMove(getWalkDir(), 2, getX(), getY()))
+        {
+            setWalkDir(chooseRandomWalkDir());
+            updateSpriteDirection();
+        }
         switch (getWorld()->getAction(playerNumber))
         {
             case ACTION_ROLL:
@@ -129,11 +160,9 @@ void PlayerAvatar::doSomething()
     if(getState() == "walking")
     {
         getNewDirection(getX(), getY());
-        if(getWalkDir() == left)
-            setDirection(left);
-        else
-            setDirection(right);
 
+        updateSpriteDirection();
+        
         moveAtAngle(getWalkDir(), 2);
         decTicksToMove();
        

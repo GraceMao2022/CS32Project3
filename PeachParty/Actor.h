@@ -36,11 +36,13 @@ protected:
     void setWalkDir(int dir) { walkDir = dir; }
     void setState(std::string newState) { state = newState; }
     void getNewDirection(int x, int y);
+    bool canMove(int dir, int dist, int x, int y);
+    void updateSpriteDirection();
+    int chooseRandomWalkDir();
 private:
     int ticks_to_move;
     int walkDir;
     std::string state;
-    bool canMove(int dir, int dist, int x, int y);
 };
 
 class PlayerAvatar: public MovingActor
