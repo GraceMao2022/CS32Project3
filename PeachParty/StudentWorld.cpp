@@ -15,7 +15,8 @@ GameWorld* createStudentWorld(string assetPath)
 StudentWorld::StudentWorld(string assetPath)
 : GameWorld(assetPath)
 {
-   
+    peach = nullptr;
+    yoshi = nullptr;
 }
 
 StudentWorld::~StudentWorld()
@@ -139,12 +140,12 @@ void StudentWorld::populateBoard(Board bd)
                     actors.push_back(blueCoin);
                     break;
                 }
-                /*case Board::star_square:
+                case Board::star_square:
                 {
                     Actor* starSquare = new StarSquare(this, SPRITE_WIDTH*i, SPRITE_HEIGHT*j);
                     actors.push_back(starSquare);
                     break;
-                }*/
+                }
                 /*case Board::up_dir_square:
                 {
                     Actor* upDirSquare = new DirectionalSquare(this, SPRITE_WIDTH*i, SPRITE_HEIGHT*j, 90);

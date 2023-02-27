@@ -114,13 +114,13 @@ int MovingActor::chooseRandomWalkDir()
 {
     std::vector<int> possibleDirections; //stores all possible directions actor can move to
     if(canMove(right, 2, getX(), getY()))
-        possibleDirections.push_back(right);
+        possibleDirections.push_back(0);
     if(canMove(left, 2, getX(), getY()))
-        possibleDirections.push_back(left);
+        possibleDirections.push_back(180);
     if(canMove(up, 2, getX(), getY()))
-        possibleDirections.push_back(up);
+        possibleDirections.push_back(90);
     if(canMove(down, 2, getX(), getY()))
-        possibleDirections.push_back(down);
+        possibleDirections.push_back(270);
     
     int randDir = randInt(0, (int)possibleDirections.size() - 1);
     
@@ -150,6 +150,7 @@ void PlayerAvatar::doSomething()
             {
                 int die_roll = randInt(1, 10);
                 setTicksToMove(die_roll * 8);
+                //setTicksToMove(8);
                 setState("walking");
                 break;
             }
@@ -167,7 +168,10 @@ void PlayerAvatar::doSomething()
         decTicksToMove();
        
         if(getTicksToMove() == 0)
-           setState("waiting to roll");
+        {
+            getNewDirection(getX(), getY()); //to get new direction if character is at a turn and is stopping there
+            setState("waiting to roll");
+        }
     }
 }
 Square::Square(StudentWorld* sw, int imgID, int x, int y, int dir):Actor(sw, imgID, x, y, dir, 1, 1.0)
@@ -241,7 +245,7 @@ void CoinSquare::doSomething()
          setYoshiIsNew(true);
 }
 
-/*StarSquare::StarSquare(StudentWorld* sw, int x, int y):Square(sw, IID_STAR_SQUARE, x, y, right)
+StarSquare::StarSquare(StudentWorld* sw, int x, int y):Square(sw, IID_STAR_SQUARE, x, y, right)
 {
     
 }
@@ -275,7 +279,7 @@ void StarSquare::doSomething()
     }
     else
         setYoshiIsNew(true);
-}*/
+}
 
 /*DirectionalSquare::DirectionalSquare(StudentWorld* sw, int x, int y, int dir):Square(sw, IID_DIR_SQUARE, x, y, dir)
 {

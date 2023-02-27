@@ -88,14 +88,14 @@ private:
     
 };
 
-/*class StarSquare: public Square
+class StarSquare: public Square
 {
 public:
     StarSquare(StudentWorld* sw, int x, int y);
     ~StarSquare(){}
     void doSomething();
 private:
-};*/
+};
 
 /*class DirectionalSquare: public Square
 {
