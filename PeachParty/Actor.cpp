@@ -281,7 +281,7 @@ void StarSquare::doSomething()
         setYoshiIsNew(true);
 }
 
-/*DirectionalSquare::DirectionalSquare(StudentWorld* sw, int x, int y, int dir):Square(sw, IID_DIR_SQUARE, x, y, dir)
+DirectionalSquare::DirectionalSquare(StudentWorld* sw, int x, int y, int dir):Square(sw, IID_DIR_SQUARE, x, y, dir)
 {
     forcingDir = dir;
 }
@@ -297,4 +297,4 @@ void DirectionalSquare::doSomething()
     {
         getWorld()->getYoshi()->setWalkDir(forcingDir);
     }
-}*/
+}

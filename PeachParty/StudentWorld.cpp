@@ -146,7 +146,7 @@ void StudentWorld::populateBoard(Board bd)
                     actors.push_back(starSquare);
                     break;
                 }
-                /*case Board::up_dir_square:
+                case Board::up_dir_square:
                 {
                     Actor* upDirSquare = new DirectionalSquare(this, SPRITE_WIDTH*i, SPRITE_HEIGHT*j, 90);
                     actors.push_back(upDirSquare);
@@ -169,7 +169,7 @@ void StudentWorld::populateBoard(Board bd)
                     Actor* rightDirSquare = new DirectionalSquare(this, SPRITE_WIDTH*i, SPRITE_HEIGHT*j, 0);
                     actors.push_back(rightDirSquare);
                     break;
-                }*/
+                }
             }
         }
     }

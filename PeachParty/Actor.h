@@ -97,7 +97,7 @@ public:
 private:
 };
 
-/*class DirectionalSquare: public Square
+class DirectionalSquare: public Square
 {
 public:
     DirectionalSquare(StudentWorld* sw, int x, int y, int dir);
@@ -105,6 +105,6 @@ public:
     void doSomething();
 private:
     int forcingDir;
-};*/
+};
 
 #endif // ACTOR_H_
