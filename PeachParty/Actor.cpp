@@ -206,10 +206,10 @@ void CoinSquare::doSomething()
                 getWorld()->getPeach()->setCoins(0);
             
             //play sound give coin
-            if(isBlue())
+            if(blue)
                 getWorld()->playSound(SOUND_GIVE_COIN);
             //play sound take coin
-            else if(!isBlue())
+            else if(!blue)
                 getWorld()->playSound(SOUND_TAKE_COIN);
             
             setPeachIsNew(false);
@@ -228,10 +228,10 @@ void CoinSquare::doSomething()
                  getWorld()->getYoshi()->setCoins(0);
              
              //play sound give coin
-             if(isBlue())
+             if(blue)
                  getWorld()->playSound(SOUND_GIVE_COIN);
              //play sound take coin
-             else if(!isBlue())
+             else if(!blue)
                  getWorld()->playSound(SOUND_TAKE_COIN);
              
              setYoshiIsNew(false);
@@ -241,7 +241,7 @@ void CoinSquare::doSomething()
          setYoshiIsNew(true);
 }
 
-StarSquare::StarSquare(StudentWorld* sw, int imgID, int x, int y):Square(sw, imgID, x, y)
+/*StarSquare::StarSquare(StudentWorld* sw, int x, int y):Square(sw, IID_STAR_SQUARE, x, y, right)
 {
     
 }
@@ -275,4 +275,22 @@ void StarSquare::doSomething()
     }
     else
         setYoshiIsNew(true);
+}*/
+
+/*DirectionalSquare::DirectionalSquare(StudentWorld* sw, int x, int y, int dir):Square(sw, IID_DIR_SQUARE, x, y, dir)
+{
+    forcingDir = dir;
 }
+
+void DirectionalSquare::doSomething()
+{
+    if(isOn(getWorld()->getPeach()->getX(), getWorld()->getPeach()->getY()))
+    {
+        getWorld()->getPeach()->setWalkDir(forcingDir);
+    }
+ 
+    if(isOn(getWorld()->getYoshi()->getX(), getWorld()->getYoshi()->getY()))
+    {
+        getWorld()->getYoshi()->setWalkDir(forcingDir);
+    }
+}*/

@@ -139,7 +139,36 @@ void StudentWorld::populateBoard(Board bd)
                     actors.push_back(blueCoin);
                     break;
                 }
-            // etc…
+                /*case Board::star_square:
+                {
+                    Actor* starSquare = new StarSquare(this, SPRITE_WIDTH*i, SPRITE_HEIGHT*j);
+                    actors.push_back(starSquare);
+                    break;
+                }*/
+                /*case Board::up_dir_square:
+                {
+                    Actor* upDirSquare = new DirectionalSquare(this, SPRITE_WIDTH*i, SPRITE_HEIGHT*j, 90);
+                    actors.push_back(upDirSquare);
+                    break;
+                }
+                case Board::down_dir_square:
+                {
+                    Actor* downDirSquare = new DirectionalSquare(this, SPRITE_WIDTH*i, SPRITE_HEIGHT*j, 270);
+                    actors.push_back(downDirSquare);
+                    break;
+                }
+                case Board::left_dir_square:
+                {
+                    Actor* leftDirSquare = new DirectionalSquare(this, SPRITE_WIDTH*i, SPRITE_HEIGHT*j, 180);
+                    actors.push_back(leftDirSquare);
+                    break;
+                }
+                case Board::right_dir_square:
+                {
+                    Actor* rightDirSquare = new DirectionalSquare(this, SPRITE_WIDTH*i, SPRITE_HEIGHT*j, 0);
+                    actors.push_back(rightDirSquare);
+                    break;
+                }*/
             }
         }
     }

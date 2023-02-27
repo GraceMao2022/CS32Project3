@@ -27,12 +27,12 @@ public:
     MovingActor(StudentWorld* sw, int imgID, int x, int y, int dir, int depth, double size);
     virtual ~MovingActor(){}
     std::string getState() const { return state; }
+    void setWalkDir(int dir) { walkDir = dir; }
 protected:
     int getTicksToMove() const { return ticks_to_move; }
     void setTicksToMove(int ticks) { ticks_to_move = ticks; }
     void decTicksToMove() { ticks_to_move--; }
     int getWalkDir() const { return walkDir; }
-    void setWalkDir(int dir) { walkDir = dir; }
     void setState(std::string newState) { state = newState; }
     void getNewDirection(int x, int y);
     bool canMove(int dir, int dist, int x, int y);
@@ -65,7 +65,6 @@ class Square: public Actor
 {
 public:
     Square(StudentWorld* sw, int imgID, int x, int y, int dir);
-    virtual ~Square();
 protected:
     bool isPeachNew() { return peachIsNew; }
     void setPeachIsNew(bool peachNew) { peachIsNew = peachNew; }
@@ -86,19 +85,26 @@ public:
 private:
     int coinValue;
     bool blue;
-    bool isBlue() { return blue; }
     
 };
 
-class StarSquare: public Square
+/*class StarSquare: public Square
 {
 public:
-    StarSquare(StudentWorld* sw, int imgID, int x, int y);
+    StarSquare(StudentWorld* sw, int x, int y);
     ~StarSquare(){}
     void doSomething();
 private:
-   
-    
-};
+};*/
+
+/*class DirectionalSquare: public Square
+{
+public:
+    DirectionalSquare(StudentWorld* sw, int x, int y, int dir);
+    ~DirectionalSquare(){}
+    void doSomething();
+private:
+    int forcingDir;
+};*/
 
 #endif // ACTOR_H_
