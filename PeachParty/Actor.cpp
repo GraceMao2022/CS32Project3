@@ -187,6 +187,33 @@ bool Square::isOn(int x, int y)
     return false;
 }
 
+void Square::doSomething()
+{
+    //peach
+    if(isOn(getWorld()->getPeach()->getX(), getWorld()->getPeach()->getY()))
+    {
+         if(isPeachNew())
+         {
+             doAction(getWorld()->getPeach());
+             setPeachIsNew(false);
+         }
+     }
+     else
+         setPeachIsNew(true);
+    
+    //yoshi
+    if(isOn(getWorld()->getYoshi()->getX(), getWorld()->getYoshi()->getY()))
+    {
+         if(isYoshiNew())
+         {
+             doAction(getWorld()->getYoshi());
+             setYoshiIsNew(false);
+         }
+     }
+     else
+         setYoshiIsNew(true);
+}
+
 CoinSquare::CoinSquare(StudentWorld* sw, int imgID, int x, int y, bool isBlue):Square(sw, imgID, x, y, right)
 {
     blue = isBlue;
@@ -196,53 +223,24 @@ CoinSquare::CoinSquare(StudentWorld* sw, int imgID, int x, int y, bool isBlue):S
         coinValue = -3;
 }
 
-void CoinSquare::doSomething()
+void CoinSquare::doAction(PlayerAvatar* playerPtr)
 {
     if(!isAlive())
         return;
-   if(isOn(getWorld()->getPeach()->getX(), getWorld()->getPeach()->getY()))
+    if(playerPtr->getState() == "waiting to roll")
     {
-        if(getWorld()->getPeach()->getState() == "waiting to roll" && isPeachNew())
-        {
-            getWorld()->getPeach()->setCoins(getWorld()->getPeach()->getCoins()+coinValue);
-            //if subtracted coins past 0
-            if(getWorld()->getPeach()->getCoins() < 0)
-                getWorld()->getPeach()->setCoins(0);
-            
-            //play sound give coin
-            if(blue)
-                getWorld()->playSound(SOUND_GIVE_COIN);
-            //play sound take coin
-            else if(!blue)
-                getWorld()->playSound(SOUND_TAKE_COIN);
-            
-            setPeachIsNew(false);
-        }
+        playerPtr->setCoins(playerPtr->getCoins()+coinValue);
+        //if subtracted coins past 0
+        if(playerPtr->getCoins() < 0)
+            playerPtr->setCoins(0);
+        
+        //play sound give coin
+        if(blue)
+            getWorld()->playSound(SOUND_GIVE_COIN);
+        //play sound take coin
+        else if(!blue)
+            getWorld()->playSound(SOUND_TAKE_COIN);
     }
-    else
-        setPeachIsNew(true);
-    
-    if(isOn(getWorld()->getYoshi()->getX(), getWorld()->getYoshi()->getY()))
-     {
-         if(getWorld()->getYoshi()->getState() == "waiting to roll" && isYoshiNew())
-         {
-             getWorld()->getYoshi()->setCoins(getWorld()->getYoshi()->getCoins()+coinValue);
-             //if subtracted coins past 0
-             if(getWorld()->getYoshi()->getCoins() < 0)
-                 getWorld()->getYoshi()->setCoins(0);
-             
-             //play sound give coin
-             if(blue)
-                 getWorld()->playSound(SOUND_GIVE_COIN);
-             //play sound take coin
-             else if(!blue)
-                 getWorld()->playSound(SOUND_TAKE_COIN);
-             
-             setYoshiIsNew(false);
-         }
-     }
-     else
-         setYoshiIsNew(true);
 }
 
 StarSquare::StarSquare(StudentWorld* sw, int x, int y):Square(sw, IID_STAR_SQUARE, x, y, right)
@@ -250,35 +248,14 @@ StarSquare::StarSquare(StudentWorld* sw, int x, int y):Square(sw, IID_STAR_SQUAR
     
 }
 
-void StarSquare::doSomething()
+void StarSquare::doAction(PlayerAvatar* playerPtr)
 {
-    if(isOn(getWorld()->getPeach()->getX(), getWorld()->getPeach()->getY()) && isPeachNew())
-    {
-        if(getWorld()->getPeach()->getCoins() < 20)
-         return;
-        
-        getWorld()->getPeach()->setCoins(getWorld()->getPeach()->getCoins()-20);
-        getWorld()->getPeach()->setStars(getWorld()->getPeach()->getStars()+1);
-        getWorld()->playSound(SOUND_GIVE_STAR);
-
-        setPeachIsNew(false);
-    }
-    else
-        setPeachIsNew(true);
-
-    if(isOn(getWorld()->getYoshi()->getX(), getWorld()->getYoshi()->getY()) && isYoshiNew())
-    {
-        if(getWorld()->getYoshi()->getCoins() < 20)
-         return;
-        
-        getWorld()->getYoshi()->setCoins(getWorld()->getYoshi()->getCoins()-20);
-        getWorld()->getYoshi()->setStars(getWorld()->getYoshi()->getStars()+1);
-        getWorld()->playSound(SOUND_GIVE_STAR);
-
-        setYoshiIsNew(false);
-    }
-    else
-        setYoshiIsNew(true);
+    if(playerPtr->getCoins() < 20)
+     return;
+    
+    playerPtr->setCoins(getWorld()->getPeach()->getCoins()-20);
+    playerPtr->setStars(getWorld()->getPeach()->getStars()+1);
+    getWorld()->playSound(SOUND_GIVE_STAR);
 }
 
 DirectionalSquare::DirectionalSquare(StudentWorld* sw, int x, int y, int dir):Square(sw, IID_DIR_SQUARE, x, y, dir)
@@ -286,15 +263,7 @@ DirectionalSquare::DirectionalSquare(StudentWorld* sw, int x, int y, int dir):Sq
     forcingDir = dir;
 }
 
-void DirectionalSquare::doSomething()
+void DirectionalSquare::doAction(PlayerAvatar* playerPtr)
 {
-    if(isOn(getWorld()->getPeach()->getX(), getWorld()->getPeach()->getY()))
-    {
-        getWorld()->getPeach()->setWalkDir(forcingDir);
-    }
- 
-    if(isOn(getWorld()->getYoshi()->getX(), getWorld()->getYoshi()->getY()))
-    {
-        getWorld()->getYoshi()->setWalkDir(forcingDir);
-    }
+    playerPtr->setWalkDir(forcingDir);
 }

@@ -65,12 +65,14 @@ class Square: public Actor
 {
 public:
     Square(StudentWorld* sw, int imgID, int x, int y, int dir);
+    void doSomething();
 protected:
     bool isPeachNew() { return peachIsNew; }
     void setPeachIsNew(bool peachNew) { peachIsNew = peachNew; }
     bool isYoshiNew() { return yoshiIsNew; }
     void setYoshiIsNew(bool yoshiNew) { yoshiIsNew = yoshiNew; }
     bool isOn(int x, int y);
+    virtual void doAction(PlayerAvatar* playerPtr) = 0;
 private:
     bool peachIsNew;
     bool yoshiIsNew;
@@ -81,7 +83,7 @@ class CoinSquare: public Square
 public:
     CoinSquare(StudentWorld* sw, int imgID, int x, int y, bool isBlue);
     ~CoinSquare(){}
-    void doSomething();
+    void doAction(PlayerAvatar* playerPtr);
 private:
     int coinValue;
     bool blue;
@@ -93,7 +95,7 @@ class StarSquare: public Square
 public:
     StarSquare(StudentWorld* sw, int x, int y);
     ~StarSquare(){}
-    void doSomething();
+    void doAction(PlayerAvatar* playerPtr);
 private:
 };
 
@@ -102,7 +104,7 @@ class DirectionalSquare: public Square
 public:
     DirectionalSquare(StudentWorld* sw, int x, int y, int dir);
     ~DirectionalSquare(){}
-    void doSomething();
+    void doAction(PlayerAvatar* playerPtr);
 private:
     int forcingDir;
 };
