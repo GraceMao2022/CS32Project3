@@ -17,6 +17,7 @@ StudentWorld::StudentWorld(string assetPath)
 {
     peach = nullptr;
     yoshi = nullptr;
+    bankBalance = 0;
 }
 
 StudentWorld::~StudentWorld()
@@ -179,14 +180,14 @@ void StudentWorld::populateBoard(Board bd)
                 }
                 case Board::event_square:
                 {
-                    Actor* blueCoin = new CoinSquare(this, IID_BLUE_COIN_SQUARE, SPRITE_WIDTH*i, SPRITE_HEIGHT*j, true);
-                    actors.push_back(blueCoin);
+                    Actor* eventCoin = new EventSquare(this, SPRITE_WIDTH*i, SPRITE_HEIGHT*j);
+                    actors.push_back(eventCoin);
                     break;
                 }
                 case Board::bank_square:
                 {
-                    Actor* blueCoin = new CoinSquare(this, IID_BLUE_COIN_SQUARE, SPRITE_WIDTH*i, SPRITE_HEIGHT*j, true);
-                    actors.push_back(blueCoin);
+                    Actor* bankCoin = new BankSquare(this, SPRITE_WIDTH*i, SPRITE_HEIGHT*j);
+                    actors.push_back(bankCoin);
                     break;
                 }
             }

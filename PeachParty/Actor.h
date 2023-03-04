@@ -10,7 +10,7 @@ class Actor: public GraphObject
 {
 public:
     Actor(StudentWorld* sw, int imgID, int x, int y, int dir, int depth, double size);
-    virtual ~Actor(){}
+    //virtual ~Actor(){}
     virtual void doSomething() = 0;
     bool isAlive() const { return alive; }
     virtual bool isSquare() const = 0;
@@ -26,7 +26,7 @@ class MovingActor: public Actor
 {
 public:
     MovingActor(StudentWorld* sw, int imgID, int x, int y, int dir, int depth, double size);
-    virtual ~MovingActor(){}
+    //virtual ~MovingActor(){}
     std::string getState() const { return state; }
     void setWalkDir(int dir) { walkDir = dir; }
 protected:
@@ -49,7 +49,7 @@ class PlayerAvatar: public MovingActor
 {
 public:
     PlayerAvatar(StudentWorld* sw, int imgID, int x, int y, int playerNum);
-    ~PlayerAvatar(){}
+    //~PlayerAvatar(){}
     void doSomething();
     bool isPlayerOne() const { return playerNumber == 1; }
     int getCoins() const { return coins; }
@@ -85,7 +85,7 @@ class CoinSquare: public Square
 {
 public:
     CoinSquare(StudentWorld* sw, int imgID, int x, int y, bool isBlue);
-    ~CoinSquare(){}
+    //~CoinSquare(){}
     void doAction(PlayerAvatar* playerPtr);
 private:
     int coinValue;
@@ -97,7 +97,7 @@ class StarSquare: public Square
 {
 public:
     StarSquare(StudentWorld* sw, int x, int y);
-    ~StarSquare(){}
+    //~StarSquare(){}
     void doAction(PlayerAvatar* playerPtr);
 private:
 };
@@ -106,10 +106,37 @@ class DirectionalSquare: public Square
 {
 public:
     DirectionalSquare(StudentWorld* sw, int x, int y, int dir);
-    ~DirectionalSquare(){}
+   // ~DirectionalSquare(){}
     void doAction(PlayerAvatar* playerPtr);
 private:
     int forcingDir;
+};
+
+class BankSquare: public Square
+{
+public:
+    BankSquare(StudentWorld* sw, int x, int y);
+    //~BankSquare(){}
+    void doAction(PlayerAvatar* playerPtr);
+private:
+};
+
+class EventSquare: public Square
+{
+public:
+    EventSquare(StudentWorld* sw, int x, int y);
+   // ~EventSquare(){}
+    void doAction(PlayerAvatar* playerPtr);
+private:
+};
+
+class DroppingSquare: public Square
+{
+public:
+    DroppingSquare(StudentWorld* sw, int x, int y);
+    //~DroppingSquare(){}
+    void doAction(PlayerAvatar* playerPtr);
+private:
 };
 
 #endif // ACTOR_H_

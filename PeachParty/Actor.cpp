@@ -320,3 +320,48 @@ void DirectionalSquare::doAction(PlayerAvatar* playerPtr)
 {
     playerPtr->setWalkDir(forcingDir);
 }
+
+BankSquare::BankSquare(StudentWorld* sw, int x, int y):Square(sw, IID_BANK_SQUARE, x, y, right)
+{
+    
+}
+
+void BankSquare::doAction(PlayerAvatar* playerPtr)
+{
+    if(playerPtr->getState() == "waiting to roll")
+    {
+        playerPtr->setCoins(playerPtr->getCoins()+getWorld()->getBankBalance());
+        getWorld()->setBankBalance(0);
+        
+        getWorld()->playSound(SOUND_WITHDRAW_BANK);
+    }
+    else
+    {
+        playerPtr->setCoins(playerPtr->getCoins()-5);
+        //if subtracted coins past 0
+        if(playerPtr->getCoins() < 0)
+            playerPtr->setCoins(0);
+        
+        getWorld()->playSound(SOUND_DEPOSIT_BANK);
+    }
+}
+
+EventSquare::EventSquare(StudentWorld* sw, int x, int y):Square(sw, IID_BANK_SQUARE, x, y, right)
+{
+    
+}
+
+void EventSquare::doAction(PlayerAvatar* playerPtr)
+{
+    
+}
+
+DroppingSquare::DroppingSquare(StudentWorld* sw, int x, int y):Square(sw, IID_BANK_SQUARE, x, y, right)
+{
+    
+}
+
+void DroppingSquare::doAction(PlayerAvatar* playerPtr)
+{
+    
+}
