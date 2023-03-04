@@ -13,6 +13,7 @@ public:
     virtual ~Actor(){}
     virtual void doSomething() = 0;
     bool isAlive() const { return alive; }
+    virtual bool isSquare() const = 0;
     
 protected:
     StudentWorld* getWorld() { return m_world; }
@@ -55,6 +56,7 @@ public:
     void setCoins(int amt) { coins = amt; }
     int getStars() const { return stars; }
     void setStars(int amt) { stars = amt; }
+    bool isSquare() const { return false; }
 private:
     int playerNumber;
     int coins;
@@ -72,6 +74,7 @@ protected:
     bool isYoshiNew() { return yoshiIsNew; }
     void setYoshiIsNew(bool yoshiNew) { yoshiIsNew = yoshiNew; }
     bool isOn(int x, int y);
+    bool isSquare() const { return true; }
     virtual void doAction(PlayerAvatar* playerPtr) = 0;
 private:
     bool peachIsNew;

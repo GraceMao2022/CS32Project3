@@ -112,7 +112,14 @@ void StudentWorld::populateBoard(Board bd)
                 //cout << "Location 5,10 is empty\n";
                 break;
                 case Board::boo:
-                //cout << "Location 5,10 has a Boo and a blue coin square\n";
+                {
+                    //add Boo
+                    
+                    
+                    Actor* blueCoin = new CoinSquare(this, IID_BLUE_COIN_SQUARE, SPRITE_WIDTH*i, SPRITE_HEIGHT*j, true);
+                    actors.push_back(blueCoin);
+                    break;
+                }
                 break;
                 case Board::bowser:
                 //cout << "Location 5,10 has a Bowser and a blue coin square\n";
@@ -170,6 +177,18 @@ void StudentWorld::populateBoard(Board bd)
                     actors.push_back(rightDirSquare);
                     break;
                 }
+                case Board::event_square:
+                {
+                    Actor* blueCoin = new CoinSquare(this, IID_BLUE_COIN_SQUARE, SPRITE_WIDTH*i, SPRITE_HEIGHT*j, true);
+                    actors.push_back(blueCoin);
+                    break;
+                }
+                case Board::bank_square:
+                {
+                    Actor* blueCoin = new CoinSquare(this, IID_BLUE_COIN_SQUARE, SPRITE_WIDTH*i, SPRITE_HEIGHT*j, true);
+                    actors.push_back(blueCoin);
+                    break;
+                }
             }
         }
     }
@@ -188,11 +207,16 @@ int StudentWorld::move()
     yoshi->doSomething();
     for(int i = 0; i < actors.size(); i++)
     {
-        actors[i]->doSomething();
+        if(actors[i]->isAlive())
+            actors[i]->doSomething();
     }
     
    // if (timeRemaining() <= 0)
      //   return GWSTATUS_PEACH_WON;
+    
+    //remove dead actors and vortex
+    
+    //display status
     
 	return GWSTATUS_CONTINUE_GAME;
 }
@@ -212,8 +236,37 @@ void StudentWorld::cleanUp()
     yoshi = nullptr;
 }
 
-Board::GridEntry StudentWorld::getActorAt(int x, int y)
+Board::GridEntry StudentWorld::getActorTypeAt(int x, int y)
 {
     Board::GridEntry ge = board.getContentsOf(x, y);
     return ge;
+}
+
+Actor* StudentWorld::getActorAt(int x, int y)
+{
+    for(int i = 0; i < actors.size(); i++)
+    {
+        if(actors[i]->getX() == x && actors[i]->getY() == y)
+            return actors[i];
+    }
+    return nullptr;
+}
+
+vector<int> StudentWorld::getValidDirsFromPos(int x, int y)
+{
+    vector<int> validDirs;
+    
+    //left
+    if(getActorAt(x-SPRITE_WIDTH, y) != nullptr && getActorAt(x-SPRITE_WIDTH, y)->isSquare())
+        validDirs.push_back(180);
+    //right
+    if(getActorAt(x+SPRITE_WIDTH, y) != nullptr && getActorAt(x+SPRITE_WIDTH, y)->isSquare())
+        validDirs.push_back(0);
+    //up
+    if(getActorAt(x, y+SPRITE_HEIGHT) != nullptr && getActorAt(x, y+SPRITE_HEIGHT)->isSquare())
+        validDirs.push_back(90);
+    //left
+    if(getActorAt(x, y-SPRITE_HEIGHT) != nullptr && getActorAt(x, y-SPRITE_HEIGHT)->isSquare())
+        validDirs.push_back(270);
+    return validDirs;
 }

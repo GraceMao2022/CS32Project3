@@ -75,27 +75,25 @@ bool MovingActor::canMove(int dir, int dist, int x, int y)
     if(dir == left)
     {
         //if it goes off screen or on a tile with nothing
-        if(x-dist < 0 || getWorld()->getActorAt((x-dist)/SPRITE_WIDTH, y/SPRITE_HEIGHT) == Board::empty)
+        if(x-dist < 0 || getWorld()->getActorTypeAt((x-dist)/SPRITE_WIDTH, y/SPRITE_HEIGHT) == Board::empty)
             return false;
         return true;
     }
     else if(dir == right)
     {
-        if(x+dist + SPRITE_WIDTH >= VIEW_WIDTH || getWorld()->getActorAt(x/SPRITE_WIDTH+1, y/SPRITE_HEIGHT) == Board::empty)
-        {
+        if(x+dist + SPRITE_WIDTH >= VIEW_WIDTH || getWorld()->getActorTypeAt(x/SPRITE_WIDTH+1, y/SPRITE_HEIGHT) == Board::empty)
             return false;
-        }
         return true;
     }
     else if(dir == up)
     {
-        if(y+dist + SPRITE_HEIGHT >= VIEW_HEIGHT || getWorld()->getActorAt(x/SPRITE_WIDTH, y/SPRITE_HEIGHT+1) == Board::empty)
+        if(y+dist + SPRITE_HEIGHT >= VIEW_HEIGHT || getWorld()->getActorTypeAt(x/SPRITE_WIDTH, y/SPRITE_HEIGHT+1) == Board::empty)
             return false;
         return true;
     }
     else
     {
-        if(y-dist <0 || getWorld()->getActorAt(x/SPRITE_WIDTH, (y-dist)/SPRITE_HEIGHT) == Board::empty)
+        if(y-dist <0 || getWorld()->getActorTypeAt(x/SPRITE_WIDTH, (y-dist)/SPRITE_HEIGHT) == Board::empty)
             return false;
         return true;
     }
@@ -154,13 +152,68 @@ void PlayerAvatar::doSomething()
                 setState("walking");
                 break;
             }
+            case ACTION_FIRE:
+            {
+                
+            }
             default:
                 return;
         }
     }
     if(getState() == "walking")
     {
-        getNewDirection(getX(), getY());
+        //if player is not on directional square
+        if(getWorld()->getActorTypeAt(getX()/SPRITE_WIDTH, getY()/SPRITE_HEIGHT) != Board::up_dir_square && getWorld()->getActorTypeAt(getX()/SPRITE_WIDTH, getY()/SPRITE_HEIGHT) != Board::down_dir_square && getWorld()->getActorTypeAt(getX()/SPRITE_WIDTH, getY()/SPRITE_HEIGHT) != Board::left_dir_square && getWorld()->getActorTypeAt(getX()/SPRITE_WIDTH, getY()/SPRITE_HEIGHT) != Board::right_dir_square)
+        {
+            std::vector<int> possibleDirs = getWorld()->getValidDirsFromPos(getX(), getY());
+            if(possibleDirs.size() > 2)
+            {
+                std::cerr << "multiple paths" << std::endl;
+                switch (getWorld()->getAction(playerNumber))
+                {
+                    case ACTION_LEFT:
+                    {
+                        for(int i = 0; i < possibleDirs.size(); i++)
+                        {
+                            if(possibleDirs[i] == left && getWalkDir() != right)
+                                setWalkDir(left);
+                        }
+                        break;
+                    }
+                    case ACTION_RIGHT:
+                    {
+                        for(int i = 0; i < possibleDirs.size(); i++)
+                        {
+                            if(possibleDirs[i] == right && getWalkDir() != left)
+                                setWalkDir(right);
+                        }
+                        break;
+                    }
+                    case ACTION_UP:
+                    {
+                        for(int i = 0; i < possibleDirs.size(); i++)
+                        {
+                            if(possibleDirs[i] == up && getWalkDir() != down)
+                                setWalkDir(up);
+                        }
+                        break;
+                    }
+                    case ACTION_DOWN:
+                    {
+                        for(int i = 0; i < possibleDirs.size(); i++)
+                        {
+                            if(possibleDirs[i] == down && getWalkDir() != up)
+                                setWalkDir(down);
+                        }
+                        break;
+                    }
+                    default:
+                        return;
+                }
+            }
+            else
+                getNewDirection(getX(), getY());
+        }
 
         updateSpriteDirection();
         

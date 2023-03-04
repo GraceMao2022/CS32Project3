@@ -18,9 +18,10 @@ class StudentWorld : public GameWorld
         virtual int init();
         virtual int move();
         virtual void cleanUp();
-        Board::GridEntry getActorAt(int x, int y);
+        Board::GridEntry getActorTypeAt(int x, int y);
         PlayerAvatar* getPeach() { return peach; }
         PlayerAvatar* getYoshi() { return yoshi; }
+        std::vector<int> getValidDirsFromPos(int x, int y);
 
     private:
     std::string getBoardFile();
@@ -29,6 +30,7 @@ class StudentWorld : public GameWorld
     PlayerAvatar* yoshi;
     Board board;
     std::vector<Actor*> actors;
+    Actor* getActorAt(int x, int y);
 };
 
 #endif // STUDENTWORLD_H_
