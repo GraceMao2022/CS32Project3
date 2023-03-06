@@ -8,6 +8,7 @@
 
 class Actor;
 class PlayerAvatar;
+class Square;
 // Students:  Add code to this file, StudentWorld.cpp, Actor.h, and Actor.cpp
 
 class StudentWorld : public GameWorld
@@ -24,6 +25,7 @@ class StudentWorld : public GameWorld
         std::vector<int> getValidDirsFromPos(int x, int y);
         int getBankBalance() { return bankBalance; }
         void setBankBalance(int amt) { bankBalance = amt; }
+        Actor* chooseRandomSquare() const;
 
     private:
     std::string getBoardFile();

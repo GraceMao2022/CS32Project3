@@ -137,6 +137,11 @@ void PlayerAvatar::doSomething()
 {
     if(getState() == "waiting to roll")
     {
+        if(getWalkDir() == -1) //if walk dir was invalid due to being teleported
+        {
+            setWalkDir(chooseRandomWalkDir());
+            updateSpriteDirection();
+        }
         if(!canMove(getWalkDir(), 2, getX(), getY()))
         {
             setWalkDir(chooseRandomWalkDir());
@@ -147,8 +152,8 @@ void PlayerAvatar::doSomething()
             case ACTION_ROLL:
             {
                 int die_roll = randInt(1, 10);
-                setTicksToMove(die_roll * 8);
-                //setTicksToMove(8);
+                //setTicksToMove(die_roll * 8);
+                setTicksToMove(8);
                 setState("walking");
                 break;
             }
@@ -168,7 +173,6 @@ void PlayerAvatar::doSomething()
             std::vector<int> possibleDirs = getWorld()->getValidDirsFromPos(getX(), getY());
             if(possibleDirs.size() > 2)
             {
-                std::cerr << "multiple paths" << std::endl;
                 switch (getWorld()->getAction(playerNumber))
                 {
                     case ACTION_LEFT:
@@ -227,6 +231,62 @@ void PlayerAvatar::doSomething()
         }
     }
 }
+
+void PlayerAvatar::teleportToRandomSquare()
+{
+    Actor* randSquare;
+    for(;;)
+    {
+        randSquare = getWorld()->chooseRandomSquare();
+        if(randSquare == nullptr) //meaning there are no other squares on the board
+            return;
+        //if the randomly chosen square is not the current square the player is on
+        if(randSquare->getX() != getX() || randSquare->getY() != getY())
+            break;
+    }
+    
+    //invalidate walking dir
+    setWalkDir(-1);
+    
+    moveTo(randSquare->getX(), randSquare->getY());
+}
+
+void PlayerAvatar::swapAttributesWithOther(PlayerAvatar* other)
+{
+    //swap positions
+    int tempX = getX();
+    int tempY = getY();
+    
+    moveTo(other->getX(), other->getY());
+    other->moveTo(tempX, tempY);
+    
+    //swap ticks
+    int tempTicks = getTicksToMove();
+    setTicksToMove(other->getTicksToMove());
+    other->setTicksToMove(tempTicks);
+    
+    //swap walkDirs
+    int tempWalkDir = getWalkDir();
+    setWalkDir(other->getWalkDir());
+    other->setWalkDir(tempWalkDir);
+    
+    //update sprite directions
+    updateSpriteDirection();
+    other->updateSpriteDirection();
+    
+    //swap states
+    std::string tempState = getState();
+    setState(other->getState());
+    other->setState(tempState);
+}
+
+Bowser::Bowser(StudentWorld* sw, int x, int y):MovingActor(sw, IID_BOWSER, x, y, right, 0, 1.0)
+{
+    travelDist = 0;
+    pauseCounter = 180;
+    setState("Paused");
+}
+
 Square::Square(StudentWorld* sw, int imgID, int x, int y, int dir):Actor(sw, imgID, x, y, dir, 1, 1.0)
 {
     peachIsNew = false;
@@ -330,10 +390,13 @@ void BankSquare::doAction(PlayerAvatar* playerPtr)
 {
     if(playerPtr->getState() == "waiting to roll")
     {
-        playerPtr->setCoins(playerPtr->getCoins()+getWorld()->getBankBalance());
-        getWorld()->setBankBalance(0);
-        
-        getWorld()->playSound(SOUND_WITHDRAW_BANK);
+        if(getWorld()->getBankBalance() > 0)
+        {
+            playerPtr->setCoins(playerPtr->getCoins()+getWorld()->getBankBalance());
+            getWorld()->setBankBalance(0);
+            
+            getWorld()->playSound(SOUND_WITHDRAW_BANK);
+        }
     }
     else
     {
@@ -346,14 +409,53 @@ void BankSquare::doAction(PlayerAvatar* playerPtr)
     }
 }
 
-EventSquare::EventSquare(StudentWorld* sw, int x, int y):Square(sw, IID_BANK_SQUARE, x, y, right)
+EventSquare::EventSquare(StudentWorld* sw, int x, int y):Square(sw, IID_EVENT_SQUARE, x, y, right)
 {
     
 }
 
 void EventSquare::doAction(PlayerAvatar* playerPtr)
 {
-    
+    if(playerPtr->getState() == "waiting to roll")
+    {
+        int randAction = randInt(1,3);
+        
+        switch(randAction)
+        {
+            case 1:
+            {
+                std::cerr << "teleport to random square" << std::endl;
+                playerPtr->teleportToRandomSquare();
+                getWorld()->playSound(SOUND_PLAYER_TELEPORT);
+                break;
+            }
+            case 2: //fixxxxx
+            {
+                //if player is peach
+                if(playerPtr->isPlayerOne())
+                {
+                    playerPtr->swapAttributesWithOther(getWorld()->getYoshi());
+                    setYoshiIsNew(false);
+                }
+                //if player is yoshi
+                if(!playerPtr->isPlayerOne())
+                {
+                    playerPtr->swapAttributesWithOther(getWorld()->getPeach());
+                    setPeachIsNew(false);
+                }
+                std::cerr << "swap with other player" << std::endl;
+                getWorld()->playSound(SOUND_PLAYER_TELEPORT);
+                break;
+            }
+            case 3:
+            {
+                playerPtr->setHasVortex(true);
+                getWorld()->playSound(SOUND_GIVE_VORTEX);
+                std::cerr << "give vortex" << std::endl;
+                break;
+            }
+        }
+    }
 }
 
 DroppingSquare::DroppingSquare(StudentWorld* sw, int x, int y):Square(sw, IID_BANK_SQUARE, x, y, right)
@@ -363,5 +465,24 @@ DroppingSquare::DroppingSquare(StudentWorld* sw, int x, int y):Square(sw, IID_BA
 
 void DroppingSquare::doAction(PlayerAvatar* playerPtr)
 {
-    
+    if(playerPtr->getState() == "waiting to roll")
+    {
+        int randAction = randInt(1,2);
+        
+        if(randAction == 1)
+        {
+            playerPtr->setCoins(playerPtr->getCoins()-10);
+            //if subtracted coins past 0
+            if(playerPtr->getCoins() < 0)
+                playerPtr->setCoins(0);
+        }
+        else
+        {
+            playerPtr->setStars(playerPtr->getStars()-1);
+            //if subtracted stars past 0
+            if(playerPtr->getStars() < 0)
+                playerPtr->setStars(0);
+        }
+        getWorld()->playSound(SOUND_DROPPING_SQUARE_ACTIVATE);
+    }
 }

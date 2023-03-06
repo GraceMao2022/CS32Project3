@@ -271,3 +271,16 @@ vector<int> StudentWorld::getValidDirsFromPos(int x, int y)
         validDirs.push_back(270);
     return validDirs;
 }
+
+Actor* StudentWorld::chooseRandomSquare() const
+{
+    //loop until we get an actor that is a squareS
+    for(;;)
+    {
+        int randActor = randInt(0, (int)actors.size()-1);
+        if(actors[randActor]->isSquare())
+            return actors[randActor];
+    }
+    
+    return nullptr;
+}

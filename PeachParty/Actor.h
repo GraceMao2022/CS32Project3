@@ -14,6 +14,7 @@ public:
     virtual void doSomething() = 0;
     bool isAlive() const { return alive; }
     virtual bool isSquare() const = 0;
+    virtual bool isImpactable() const = 0;
     
 protected:
     StudentWorld* getWorld() { return m_world; }
@@ -57,10 +58,27 @@ public:
     int getStars() const { return stars; }
     void setStars(int amt) { stars = amt; }
     bool isSquare() const { return false; }
+    void teleportToRandomSquare();
+    void swapAttributesWithOther(PlayerAvatar* other);
+    void setHasVortex(bool hasVor) { hasVortex = hasVor; }
+    bool playerHasVortex() { return hasVortex; }
+    bool isImpactable() const { return false; }
+    
 private:
     int playerNumber;
     int coins;
     int stars;
+    bool hasVortex;
+};
+
+class Bowser: public MovingActor
+{
+public:
+    Bowser(StudentWorld* sw, int x, int y);
+    bool isImpactable() const { return true; }
+private:
+    int travelDist;
+    int pauseCounter;
 };
 
 class Square: public Actor
@@ -76,6 +94,7 @@ protected:
     bool isOn(int x, int y);
     bool isSquare() const { return true; }
     virtual void doAction(PlayerAvatar* playerPtr) = 0;
+    bool isImpactable() const { return false; }
 private:
     bool peachIsNew;
     bool yoshiIsNew;
