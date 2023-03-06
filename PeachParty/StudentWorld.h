@@ -27,6 +27,7 @@ class StudentWorld : public GameWorld
         void setBankBalance(int amt) { bankBalance = amt; }
         Actor* chooseRandomSquare() const;
         void replaceSquareWithDropping(int x, int y);
+        std::string getGameText();
 
     private:
     std::string getBoardFile();

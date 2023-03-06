@@ -159,8 +159,8 @@ void PlayerAvatar::doSomething()
             case ACTION_ROLL:
             {
                 int die_roll = randInt(1, 10);
-                //setTicksToMove(die_roll * 8);
-                setTicksToMove(8);
+                setTicksToMove(die_roll * 8);
+                //setTicksToMove(8);
                 setState("walking");
                 break;
             }
@@ -287,6 +287,20 @@ void PlayerAvatar::swapAttributesWithOther(PlayerAvatar* other)
     other->setState(tempState);
 }
 
+void PlayerAvatar::swapStars(PlayerAvatar* playerPtr)
+{
+    int temp = getStars();
+    setStars(playerPtr->getStars());
+    playerPtr->setStars(temp);
+}
+
+void PlayerAvatar::swapCoins(PlayerAvatar* playerPtr)
+{
+    int temp = getCoins();
+    setCoins(playerPtr->getCoins());
+    playerPtr->setCoins(temp);
+}
+
 Enemy::Enemy(StudentWorld* sw, int imgID, int x, int y):MovingActor(sw, imgID, x, y, right, 0, 1.0)
 {
     travelDist = 0;
@@ -380,6 +394,34 @@ void Bowser::doAction(PlayerAvatar* playerPtr)
         playerPtr->setStars(0);
         getWorld()->playSound(SOUND_BOWSER_ACTIVATE);
     }
+}
+
+Boo::Boo(StudentWorld* sw, int x, int y):Enemy(sw, IID_BOO, x, y)
+{
+    
+}
+
+void Boo::doAction(PlayerAvatar* playerPtr)
+{
+    int randNum = randInt(1,2);
+    
+    if(randNum == 1)
+    {
+        //is peach
+        if(playerPtr->isPlayerOne())
+            playerPtr->swapStars(getWorld()->getYoshi());
+        else
+            playerPtr->swapStars(getWorld()->getPeach());
+    }
+    else
+    {
+        //is peach
+        if(playerPtr->isPlayerOne())
+            playerPtr->swapCoins(getWorld()->getYoshi());
+        else
+            playerPtr->swapCoins(getWorld()->getPeach());
+    }
+    getWorld()->playSound(SOUND_BOO_ACTIVATE);
 }
 
 Square::Square(StudentWorld* sw, int imgID, int x, int y, int dir):Actor(sw, imgID, x, y, dir, 1, 1.0)

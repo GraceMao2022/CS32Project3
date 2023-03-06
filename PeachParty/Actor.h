@@ -39,8 +39,8 @@ public:
     std::string getState() const { return state; }
     void setWalkDir(int dir) { walkDir = dir; }
     bool isSquare() const { return false; }
-protected:
     int getTicksToMove() const { return ticks_to_move; }
+protected:
     void setTicksToMove(int ticks) { ticks_to_move = ticks; }
     void decTicksToMove() { ticks_to_move--; }
     int getWalkDir() const { return walkDir; }
@@ -66,6 +66,8 @@ public:
     void setCoins(int amt) { coins = amt; }
     int getStars() const { return stars; }
     void setStars(int amt) { stars = amt; }
+    void swapStars(PlayerAvatar* playerPtr);
+    void swapCoins(PlayerAvatar* playerPtr);
     void teleportToRandomSquare();
     void swapAttributesWithOther(PlayerAvatar* other);
     void setHasVortex(bool hasVor) { hasVortex = hasVor; }
@@ -98,6 +100,14 @@ public:
     Bowser(StudentWorld* sw, int x, int y);
     void doAction(PlayerAvatar* playerPtr);
     bool canMakeDroppingSquare() const { return true; }
+};
+
+class Boo: public Enemy
+{
+public:
+    Boo(StudentWorld* sw, int x, int y);
+    void doAction(PlayerAvatar* playerPtr);
+    bool canMakeDroppingSquare() const { return false; }
 };
 
 class Square: public Actor

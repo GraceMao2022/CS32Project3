@@ -33,9 +33,15 @@ int StudentWorld::init()
     board = bd;
     
     if (result == Board::load_fail_file_not_found)
+    {
         cerr << "Could not find board01.txt data file\n";
+        return GWSTATUS_BOARD_ERROR;
+    }
     else if (result == Board::load_fail_bad_format)
+    {
         cerr << "Your board was improperly formatted\n";
+        return GWSTATUS_BOARD_ERROR;
+    }
     else if (result == Board::load_success) {
         cerr << "Successfully loaded board\n";
         populateBoard(board);
@@ -114,8 +120,8 @@ void StudentWorld::populateBoard(Board bd)
                 break;
                 case Board::boo:
                 {
-                    //add Boo
-                    
+                    Actor* boo = new Boo(this, SPRITE_WIDTH*i, SPRITE_HEIGHT*j);
+                    actors.push_back(boo);
                     
                     Actor* blueCoin = new CoinSquare(this, IID_BLUE_COIN_SQUARE, SPRITE_WIDTH*i, SPRITE_HEIGHT*j, true);
                     actors.push_back(blueCoin);
@@ -202,13 +208,35 @@ void StudentWorld::populateBoard(Board bd)
 
 int StudentWorld::move()
 {
-    // This code is here merely to allow the game to build, run, and terminate after you hit ESC.
-    // Notice that the return value GWSTATUS_NOT_IMPLEMENTED will cause our framework to end the game.
-
-    //setGameStatText("Game will end in a few seconds");
+    if (timeRemaining() <= 0)
+    {
+        playSound(SOUND_GAME_FINISHED);
+        int winner = -1;
+        if(peach->getStars() > yoshi->getStars())
+            winner = 1;
+        else if(peach->getStars() < yoshi->getStars())
+            winner = 2;
+        else
+        {
+            if(peach->getCoins() > yoshi->getCoins())
+                winner = 1;
+            else if(peach->getCoins() < yoshi->getCoins())
+                winner = 2;
+            else
+                winner = randInt(1,2);
+        }
+        if(winner == 1)
+        {
+            setFinalScore(peach->getStars(), peach->getCoins());
+            return GWSTATUS_PEACH_WON;
+        }
+        else
+        {
+            setFinalScore(yoshi->getStars(), yoshi->getCoins());
+            return GWSTATUS_YOSHI_WON;
+        }
+    }
     
-    //if (timeRemaining() <= 0)
-		//return GWSTATUS_NOT_IMPLEMENTED;
     peach->doSomething();
     yoshi->doSomething();
     for(int i = 0; i < actors.size(); i++)
@@ -217,14 +245,35 @@ int StudentWorld::move()
             actors[i]->doSomething();
     }
     
-   // if (timeRemaining() <= 0)
-     //   return GWSTATUS_PEACH_WON;
-    
-    //remove dead actors and vortex
-    
-    //display status
+    setGameStatText(getGameText());
     
 	return GWSTATUS_CONTINUE_GAME;
+}
+
+string StudentWorld::getGameText()
+{
+    string gameText = "P1 Roll: ";
+    gameText += std::to_string(peach->getTicksToMove()/8);
+    gameText += " Stars: ";
+    gameText += std::to_string(peach->getStars());
+    gameText += " $$: ";
+    gameText += std::to_string(peach->getCoins());
+    if(peach->playerHasVortex())
+        gameText += " VOR";
+    gameText += " | Time: ";
+    gameText += std::to_string(timeRemaining());
+    gameText += " | Bank: ";
+    gameText += std::to_string(bankBalance);
+    gameText += " | P2 Roll: ";
+    gameText += std::to_string(yoshi->getTicksToMove()/8);
+    gameText += " Stars: ";
+    gameText += std::to_string(yoshi->getStars());
+    gameText += " $$: ";
+    gameText += std::to_string(yoshi->getCoins());
+    if(yoshi->playerHasVortex())
+        gameText += " VOR";
+    
+    return gameText;
 }
 
 void StudentWorld::cleanUp()
