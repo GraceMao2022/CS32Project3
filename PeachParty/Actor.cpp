@@ -9,6 +9,13 @@ Actor::Actor(StudentWorld* sw, int imgID, int x, int y, int dir = right, int dep
     alive = true;
 }
 
+bool Actor::isOn(int x, int y)
+{
+    if(x == getX() && y == getY())
+        return true;
+    return false;
+}
+
 MovingActor::MovingActor(StudentWorld* sw, int imgID, int x, int y, int dir, int depth, double size) : Actor(sw, imgID, x, y, dir, depth, size)
 {
     ticks_to_move = 0;
@@ -280,24 +287,105 @@ void PlayerAvatar::swapAttributesWithOther(PlayerAvatar* other)
     other->setState(tempState);
 }
 
-Bowser::Bowser(StudentWorld* sw, int x, int y):MovingActor(sw, IID_BOWSER, x, y, right, 0, 1.0)
+Enemy::Enemy(StudentWorld* sw, int imgID, int x, int y):MovingActor(sw, imgID, x, y, right, 0, 1.0)
 {
     travelDist = 0;
     pauseCounter = 180;
     setState("Paused");
+    setPeachIsNew(true);
+    setYoshiIsNew(true);
+}
+
+void Enemy::doSomething()
+{
+    if(getState() == "Paused")
+    {
+        if(isOn(getWorld()->getPeach()->getX(), getWorld()->getPeach()->getY()))
+        {
+            if(isPeachNew())
+            {
+                doAction(getWorld()->getPeach());
+                setPeachIsNew(false);
+            }
+        }
+        else
+            setPeachIsNew(true);
+        
+        if(isOn(getWorld()->getYoshi()->getX(), getWorld()->getYoshi()->getY()))
+        {
+            if(isYoshiNew())
+            {
+                doAction(getWorld()->getYoshi());
+                setYoshiIsNew(false);
+            }
+        }
+        else
+            setYoshiIsNew(true);
+        
+        pauseCounter--;
+        if(pauseCounter == 0)
+        {
+            int die_roll = randInt(1, 10);
+            setTicksToMove(die_roll * 8);
+            std::vector<int> possibleDirs = getWorld()->getValidDirsFromPos(getX(), getY());
+            int randDir = randInt(0, (int)possibleDirs.size() - 1);
+            setWalkDir(possibleDirs[randDir]);
+            updateSpriteDirection();
+            setState("Walking");
+        }
+    }
+    if(getState() == "Walking")
+    {
+        std::vector<int> possibleDirs = getWorld()->getValidDirsFromPos(getX(), getY());
+        if(possibleDirs.size() > 2)
+        {
+            int randDir = randInt(0, (int)possibleDirs.size() - 1);
+            setWalkDir(possibleDirs[randDir]);
+        }
+        else if(!canMove(getWalkDir(), 2, getX(), getY()))
+            getNewDirection(getX(), getY());
+        
+        updateSpriteDirection();
+        moveAtAngle(getWalkDir(), 2);
+        decTicksToMove();
+        if(getTicksToMove() == 0)
+        {
+            setState("Paused");
+            pauseCounter = 180;
+            if(canMakeDroppingSquare())
+            {
+                int randNum = randInt(1,4);
+                if(randNum == 1)
+                {
+                    getWorld()->replaceSquareWithDropping(getX(), getY());
+                    getWorld()->playSound(SOUND_DROPPING_SQUARE_CREATED);
+                }
+            }
+        }
+    }
+}
+
+Bowser::Bowser(StudentWorld* sw, int x, int y):Enemy(sw, IID_BOWSER, x, y)
+{
+    
+}
+
+void Bowser::doAction(PlayerAvatar* playerPtr)
+{
+    int randNum = randInt(1,2);
+    
+    if(randNum == 1)
+    {
+        playerPtr->setCoins(0);
+        playerPtr->setStars(0);
+        getWorld()->playSound(SOUND_BOWSER_ACTIVATE);
+    }
 }
 
 Square::Square(StudentWorld* sw, int imgID, int x, int y, int dir):Actor(sw, imgID, x, y, dir, 1, 1.0)
 {
-    peachIsNew = false;
-    yoshiIsNew = false;
-}
-
-bool Square::isOn(int x, int y)
-{
-    if(x == getX() && y == getY())
-        return true;
-    return false;
+    setPeachIsNew(false);
+    setYoshiIsNew(false);
 }
 
 void Square::doSomething()
@@ -458,7 +546,7 @@ void EventSquare::doAction(PlayerAvatar* playerPtr)
     }
 }
 
-DroppingSquare::DroppingSquare(StudentWorld* sw, int x, int y):Square(sw, IID_BANK_SQUARE, x, y, right)
+DroppingSquare::DroppingSquare(StudentWorld* sw, int x, int y):Square(sw, IID_DROPPING_SQUARE, x, y, right)
 {
     
 }

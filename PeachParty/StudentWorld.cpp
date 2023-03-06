@@ -121,10 +121,15 @@ void StudentWorld::populateBoard(Board bd)
                     actors.push_back(blueCoin);
                     break;
                 }
-                break;
                 case Board::bowser:
-                //cout << "Location 5,10 has a Bowser and a blue coin square\n";
-                break;
+                {
+                    Actor* bowser = new Bowser(this, SPRITE_WIDTH*i, SPRITE_HEIGHT*j);
+                    actors.push_back(bowser);
+                    
+                    Actor* blueCoin = new CoinSquare(this, IID_BLUE_COIN_SQUARE, SPRITE_WIDTH*i, SPRITE_HEIGHT*j, true);
+                    actors.push_back(blueCoin);
+                    break;
+                }
                 case Board::player:
                 {
                     peach = new PlayerAvatar(this, IID_PEACH, SPRITE_WIDTH*i, SPRITE_HEIGHT*j, 1);
@@ -243,13 +248,17 @@ Board::GridEntry StudentWorld::getActorTypeAt(int x, int y)
     return ge;
 }
 
-Actor* StudentWorld::getActorAt(int x, int y)
+Actor* StudentWorld::getSquareActorAt(int x, int y, int& index)
 {
     for(int i = 0; i < actors.size(); i++)
     {
-        if(actors[i]->getX() == x && actors[i]->getY() == y)
+        if(actors[i]->getX() == x && actors[i]->getY() == y && actors[i]->isSquare())
+        {
+            index = i;
             return actors[i];
+        }
     }
+    index = -1;
     return nullptr;
 }
 
@@ -257,17 +266,18 @@ vector<int> StudentWorld::getValidDirsFromPos(int x, int y)
 {
     vector<int> validDirs;
     
+    int i = 0;
     //left
-    if(getActorAt(x-SPRITE_WIDTH, y) != nullptr && getActorAt(x-SPRITE_WIDTH, y)->isSquare())
+    if(getSquareActorAt(x-SPRITE_WIDTH, y, i) != nullptr && getSquareActorAt(x-SPRITE_WIDTH, y, i)->isSquare())
         validDirs.push_back(180);
     //right
-    if(getActorAt(x+SPRITE_WIDTH, y) != nullptr && getActorAt(x+SPRITE_WIDTH, y)->isSquare())
+    if(getSquareActorAt(x+SPRITE_WIDTH, y, i) != nullptr && getSquareActorAt(x+SPRITE_WIDTH, y, i)->isSquare())
         validDirs.push_back(0);
     //up
-    if(getActorAt(x, y+SPRITE_HEIGHT) != nullptr && getActorAt(x, y+SPRITE_HEIGHT)->isSquare())
+    if(getSquareActorAt(x, y+SPRITE_HEIGHT, i) != nullptr && getSquareActorAt(x, y+SPRITE_HEIGHT, i)->isSquare())
         validDirs.push_back(90);
-    //left
-    if(getActorAt(x, y-SPRITE_HEIGHT) != nullptr && getActorAt(x, y-SPRITE_HEIGHT)->isSquare())
+    //down
+    if(getSquareActorAt(x, y-SPRITE_HEIGHT, i) != nullptr && getSquareActorAt(x, y-SPRITE_HEIGHT, i)->isSquare())
         validDirs.push_back(270);
     return validDirs;
 }
@@ -283,4 +293,20 @@ Actor* StudentWorld::chooseRandomSquare() const
     }
     
     return nullptr;
+}
+
+void StudentWorld::replaceSquareWithDropping(int x, int y)
+{
+    int i = 0;
+    Actor* square = getSquareActorAt(x, y, i);
+    if(square != nullptr)
+    {
+        square->setIsAlive(false);
+      
+        delete square;
+        actors.erase(actors.begin() + i);
+       
+        square = new DroppingSquare(this, x, y);
+        actors.push_back(square);
+    }
 }

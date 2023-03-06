@@ -12,15 +12,23 @@ public:
     Actor(StudentWorld* sw, int imgID, int x, int y, int dir, int depth, double size);
     //virtual ~Actor(){}
     virtual void doSomething() = 0;
+    void setIsAlive(bool isAlive) { alive = isAlive; }
     bool isAlive() const { return alive; }
     virtual bool isSquare() const = 0;
     virtual bool isImpactable() const = 0;
+    bool isOn(int x, int y);
+    bool isPeachNew() { return peachIsNew; }
+    void setPeachIsNew(bool peachNew) { peachIsNew = peachNew; }
+    bool isYoshiNew() { return yoshiIsNew; }
+    void setYoshiIsNew(bool yoshiNew) { yoshiIsNew = yoshiNew; }
     
 protected:
     StudentWorld* getWorld() { return m_world; }
 private:
     StudentWorld* m_world;
     bool alive;
+    bool peachIsNew;
+    bool yoshiIsNew;
 };
 
 class MovingActor: public Actor
@@ -30,6 +38,7 @@ public:
     //virtual ~MovingActor(){}
     std::string getState() const { return state; }
     void setWalkDir(int dir) { walkDir = dir; }
+    bool isSquare() const { return false; }
 protected:
     int getTicksToMove() const { return ticks_to_move; }
     void setTicksToMove(int ticks) { ticks_to_move = ticks; }
@@ -57,7 +66,6 @@ public:
     void setCoins(int amt) { coins = amt; }
     int getStars() const { return stars; }
     void setStars(int amt) { stars = amt; }
-    bool isSquare() const { return false; }
     void teleportToRandomSquare();
     void swapAttributesWithOther(PlayerAvatar* other);
     void setHasVortex(bool hasVor) { hasVortex = hasVor; }
@@ -71,14 +79,25 @@ private:
     bool hasVortex;
 };
 
-class Bowser: public MovingActor
+class Enemy: public MovingActor
 {
 public:
-    Bowser(StudentWorld* sw, int x, int y);
+    Enemy(StudentWorld* sw, int imgID, int x, int y);
     bool isImpactable() const { return true; }
+    void doSomething();
+    virtual void doAction(PlayerAvatar* playerPtr) = 0;
+    virtual bool canMakeDroppingSquare() const = 0;
 private:
     int travelDist;
     int pauseCounter;
+};
+
+class Bowser: public Enemy
+{
+public:
+    Bowser(StudentWorld* sw, int x, int y);
+    void doAction(PlayerAvatar* playerPtr);
+    bool canMakeDroppingSquare() const { return true; }
 };
 
 class Square: public Actor
@@ -87,17 +106,10 @@ public:
     Square(StudentWorld* sw, int imgID, int x, int y, int dir);
     void doSomething();
 protected:
-    bool isPeachNew() { return peachIsNew; }
-    void setPeachIsNew(bool peachNew) { peachIsNew = peachNew; }
-    bool isYoshiNew() { return yoshiIsNew; }
-    void setYoshiIsNew(bool yoshiNew) { yoshiIsNew = yoshiNew; }
-    bool isOn(int x, int y);
     bool isSquare() const { return true; }
     virtual void doAction(PlayerAvatar* playerPtr) = 0;
     bool isImpactable() const { return false; }
 private:
-    bool peachIsNew;
-    bool yoshiIsNew;
 };
 
 class CoinSquare: public Square

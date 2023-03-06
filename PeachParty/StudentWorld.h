@@ -26,6 +26,7 @@ class StudentWorld : public GameWorld
         int getBankBalance() { return bankBalance; }
         void setBankBalance(int amt) { bankBalance = amt; }
         Actor* chooseRandomSquare() const;
+        void replaceSquareWithDropping(int x, int y);
 
     private:
     std::string getBoardFile();
@@ -34,7 +35,7 @@ class StudentWorld : public GameWorld
     PlayerAvatar* yoshi;
     Board board;
     std::vector<Actor*> actors;
-    Actor* getActorAt(int x, int y);
+    Actor* getSquareActorAt(int x, int y, int& index);
     int bankBalance;
 };
 
