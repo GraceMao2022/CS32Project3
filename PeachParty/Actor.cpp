@@ -16,7 +16,7 @@ bool Actor::isOn(int x, int y)
     return false;
 }
 
-MovingActor::MovingActor(StudentWorld* sw, int imgID, int x, int y, int dir, int depth, double size) : Actor(sw, imgID, x, y, dir, depth, size)
+MovingActor::MovingActor(StudentWorld* sw, int imgID, int x, int y) : Actor(sw, imgID, x, y, right, 0, 1.0)
 {
     ticks_to_move = 0;
     walkDir = right;
@@ -132,7 +132,26 @@ int MovingActor::chooseRandomWalkDir()
     return possibleDirections[randDir];
 }
 
-PlayerAvatar::PlayerAvatar(StudentWorld* sw, int imgID, int x, int y, int playerNum):MovingActor(sw, imgID, x, y, right, 0, 1.0)
+void MovingActor::teleportToRandomSquare()
+{
+    Actor* randSquare;
+    for(;;)
+    {
+        randSquare = getWorld()->chooseRandomSquare();
+        if(randSquare == nullptr) //meaning there are no other squares on the board
+            return;
+        //if the randomly chosen square is not the current square the player is on
+        if(randSquare->getX() != getX() || randSquare->getY() != getY())
+            break;
+    }
+    
+    //invalidate walking dir
+    setWalkDir(-1);
+    
+    moveTo(randSquare->getX(), randSquare->getY());
+}
+
+PlayerAvatar::PlayerAvatar(StudentWorld* sw, int imgID, int x, int y, int playerNum):MovingActor(sw, imgID, x, y)
 {
     playerNumber = playerNum;
     setState("waiting to roll");
@@ -166,7 +185,14 @@ void PlayerAvatar::doSomething()
             }
             case ACTION_FIRE:
             {
-                
+                if(hasVortex)
+                {
+                    Vortex* vortex = new Vortex(getWorld(), getX(), getY());
+                    vortex->setWalkDir(getWalkDir());
+                    getWorld()->addNewActor(vortex);
+                    getWorld()->playSound(SOUND_PLAYER_FIRE);
+                    hasVortex = false;
+                }
             }
             default:
                 return;
@@ -239,25 +265,6 @@ void PlayerAvatar::doSomething()
     }
 }
 
-void PlayerAvatar::teleportToRandomSquare()
-{
-    Actor* randSquare;
-    for(;;)
-    {
-        randSquare = getWorld()->chooseRandomSquare();
-        if(randSquare == nullptr) //meaning there are no other squares on the board
-            return;
-        //if the randomly chosen square is not the current square the player is on
-        if(randSquare->getX() != getX() || randSquare->getY() != getY())
-            break;
-    }
-    
-    //invalidate walking dir
-    setWalkDir(-1);
-    
-    moveTo(randSquare->getX(), randSquare->getY());
-}
-
 void PlayerAvatar::swapAttributesWithOther(PlayerAvatar* other)
 {
     //swap positions
@@ -301,7 +308,7 @@ void PlayerAvatar::swapCoins(PlayerAvatar* playerPtr)
     playerPtr->setCoins(temp);
 }
 
-Enemy::Enemy(StudentWorld* sw, int imgID, int x, int y):MovingActor(sw, imgID, x, y, right, 0, 1.0)
+Enemy::Enemy(StudentWorld* sw, int imgID, int x, int y):MovingActor(sw, imgID, x, y)
 {
     travelDist = 0;
     pauseCounter = 180;
@@ -379,6 +386,15 @@ void Enemy::doSomething()
     }
 }
 
+void Enemy::doImpactedAction()
+{
+    teleportToRandomSquare();
+    setWalkDir(right);
+    updateSpriteDirection();
+    setState("Paused");
+    pauseCounter = 180;
+}
+
 Bowser::Bowser(StudentWorld* sw, int x, int y):Enemy(sw, IID_BOWSER, x, y)
 {
     
@@ -424,6 +440,33 @@ void Boo::doAction(PlayerAvatar* playerPtr)
     getWorld()->playSound(SOUND_BOO_ACTIVATE);
 }
 
+Vortex::Vortex(StudentWorld* sw, int x, int y):MovingActor(sw, IID_VORTEX, x, y)
+{
+    
+}
+
+void Vortex::doSomething()
+{
+    if(!isAlive())
+        return;
+    
+    //move vortex 2 pixels in movement direction
+    moveAtAngle(getWalkDir(), 2);
+    
+    //if Vortex has left boundaries
+    if(getX() < 0 || getY() < 0 || getX() >= VIEW_WIDTH || getY() >= VIEW_HEIGHT)
+        setIsAlive(false);
+    
+    Enemy* impactedActor = getWorld()->getOverlapEnemy(getX(), getY());
+    if(impactedActor != nullptr)
+    {
+        std::cerr << "hit impactable enemy" << std::endl;
+        impactedActor->doImpactedAction();
+        setIsAlive(false);
+        getWorld()->playSound(SOUND_HIT_BY_VORTEX);
+    }
+}
+
 Square::Square(StudentWorld* sw, int imgID, int x, int y, int dir):Actor(sw, imgID, x, y, dir, 1, 1.0)
 {
     setPeachIsNew(false);
@@ -432,6 +475,8 @@ Square::Square(StudentWorld* sw, int imgID, int x, int y, int dir):Actor(sw, img
 
 void Square::doSomething()
 {
+    if(!isAlive())
+        return;
     //peach
     if(isOn(getWorld()->getPeach()->getX(), getWorld()->getPeach()->getY()))
     {
@@ -468,8 +513,6 @@ CoinSquare::CoinSquare(StudentWorld* sw, int imgID, int x, int y, bool isBlue):S
 
 void CoinSquare::doAction(PlayerAvatar* playerPtr)
 {
-    if(!isAlive())
-        return;
     if(playerPtr->getState() == "waiting to roll")
     {
         playerPtr->setCoins(playerPtr->getCoins()+coinValue);
@@ -530,11 +573,17 @@ void BankSquare::doAction(PlayerAvatar* playerPtr)
     }
     else
     {
-        playerPtr->setCoins(playerPtr->getCoins()-5);
-        //if subtracted coins past 0
-        if(playerPtr->getCoins() < 0)
+        if(playerPtr->getCoins() < 5)
+        {
+            getWorld()->setBankBalance(getWorld()->getBankBalance() + playerPtr->getCoins());
             playerPtr->setCoins(0);
-        
+        }
+        else
+        {
+            playerPtr->setCoins(playerPtr->getCoins()-5);
+            getWorld()->setBankBalance(getWorld()->getBankBalance() + 5);
+        }
+
         getWorld()->playSound(SOUND_DEPOSIT_BANK);
     }
 }
@@ -549,7 +598,7 @@ void EventSquare::doAction(PlayerAvatar* playerPtr)
     if(playerPtr->getState() == "waiting to roll")
     {
         int randAction = randInt(1,3);
-        
+        //int randAction = 3;
         switch(randAction)
         {
             case 1:

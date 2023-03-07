@@ -243,6 +243,11 @@ int StudentWorld::move()
     {
         if(actors[i]->isAlive())
             actors[i]->doSomething();
+        else
+        {
+            delete actors[i];
+            actors.erase(actors.begin() + i);
+        }
     }
     
     setGameStatText(getGameText());
@@ -352,10 +357,33 @@ void StudentWorld::replaceSquareWithDropping(int x, int y)
     {
         square->setIsAlive(false);
       
-        delete square;
-        actors.erase(actors.begin() + i);
+        //delete square;
+        //actors.erase(actors.begin() + i);
        
         square = new DroppingSquare(this, x, y);
         actors.push_back(square);
     }
+}
+
+Enemy* StudentWorld::getOverlapEnemy(int x, int y)
+{
+    for(int i = 0; i < actors.size(); i++)
+    {
+        if(actors[i]->isImpactable())
+        {
+            if(x + SPRITE_WIDTH - 1 >= actors[i]->getX() && x < actors[i]->getX() + SPRITE_WIDTH)
+            {
+                if(y + SPRITE_HEIGHT - 1 >= actors[i]->getY() && y < actors[i]->getY() + SPRITE_HEIGHT)
+                {
+                    return static_cast<Enemy*>(actors[i]);
+                }
+            }
+        }
+    }
+    return nullptr;
+}
+
+void StudentWorld::addNewActor(Actor* actor)
+{
+    actors.push_back(actor);
 }

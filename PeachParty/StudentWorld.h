@@ -9,6 +9,7 @@
 class Actor;
 class PlayerAvatar;
 class Square;
+class Enemy;
 // Students:  Add code to this file, StudentWorld.cpp, Actor.h, and Actor.cpp
 
 class StudentWorld : public GameWorld
@@ -28,6 +29,8 @@ class StudentWorld : public GameWorld
         Actor* chooseRandomSquare() const;
         void replaceSquareWithDropping(int x, int y);
         std::string getGameText();
+        Enemy* getOverlapEnemy(int x, int y);
+        void addNewActor(Actor* actor);
 
     private:
     std::string getBoardFile();

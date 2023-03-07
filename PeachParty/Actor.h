@@ -34,12 +34,13 @@ private:
 class MovingActor: public Actor
 {
 public:
-    MovingActor(StudentWorld* sw, int imgID, int x, int y, int dir, int depth, double size);
+    MovingActor(StudentWorld* sw, int imgID, int x, int y);
     //virtual ~MovingActor(){}
     std::string getState() const { return state; }
     void setWalkDir(int dir) { walkDir = dir; }
     bool isSquare() const { return false; }
     int getTicksToMove() const { return ticks_to_move; }
+    void teleportToRandomSquare();
 protected:
     void setTicksToMove(int ticks) { ticks_to_move = ticks; }
     void decTicksToMove() { ticks_to_move--; }
@@ -68,7 +69,6 @@ public:
     void setStars(int amt) { stars = amt; }
     void swapStars(PlayerAvatar* playerPtr);
     void swapCoins(PlayerAvatar* playerPtr);
-    void teleportToRandomSquare();
     void swapAttributesWithOther(PlayerAvatar* other);
     void setHasVortex(bool hasVor) { hasVortex = hasVor; }
     bool playerHasVortex() { return hasVortex; }
@@ -89,6 +89,7 @@ public:
     void doSomething();
     virtual void doAction(PlayerAvatar* playerPtr) = 0;
     virtual bool canMakeDroppingSquare() const = 0;
+    void doImpactedAction();
 private:
     int travelDist;
     int pauseCounter;
@@ -108,6 +109,15 @@ public:
     Boo(StudentWorld* sw, int x, int y);
     void doAction(PlayerAvatar* playerPtr);
     bool canMakeDroppingSquare() const { return false; }
+};
+
+class Vortex: public MovingActor
+{
+public:
+    Vortex(StudentWorld* sw, int x, int y);
+    bool isImpactable() const { return false; }
+    void doSomething();
+private:
 };
 
 class Square: public Actor
