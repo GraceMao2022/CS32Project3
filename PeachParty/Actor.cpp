@@ -9,7 +9,8 @@ Actor::Actor(StudentWorld* sw, int imgID, int x, int y, int dir = right, int dep
     alive = true;
 }
 
-bool Actor::isOn(int x, int y)
+//checks if position (x, y) is the same as the current position of this actor
+bool Actor::isOn(int x, int y) const
 {
     if(x == getX() && y == getY())
         return true;
@@ -22,6 +23,7 @@ MovingActor::MovingActor(StudentWorld* sw, int imgID, int x, int y) : Actor(sw, 
     walkDir = right;
 }
 
+//gets the new direction of the actor and sets the walking direction to it (new direction may be the same as the old direction or a different one if actor is at a corner)
 void MovingActor::getNewDirection(int x, int y)
 {
     switch(walkDir)
@@ -33,6 +35,7 @@ void MovingActor::getNewDirection(int x, int y)
                 //move up instead if possible
                 if(canMove(up, 2, x, y))
                     walkDir = up;
+                //move down instead if possible
                 else if(canMove(down, 2, x, y))
                     walkDir = down;
             }
@@ -45,6 +48,7 @@ void MovingActor::getNewDirection(int x, int y)
                 //move up instead if possible
                 if(canMove(up, 2, x, y))
                     walkDir = up;
+                //move down instead if possible
                 else if(canMove(down, 2, x, y))
                     walkDir = down;
             }
@@ -54,9 +58,10 @@ void MovingActor::getNewDirection(int x, int y)
         {
             if(!canMove(up, 2, x, y))
             {
-                //move up instead if possible
+                //move right instead if possible
                 if(canMove(right, 2, x, y))
                     walkDir = right;
+                //move left instead if possible
                 else if(canMove(left, 2, x, y))
                     walkDir = left;
             }
@@ -66,9 +71,10 @@ void MovingActor::getNewDirection(int x, int y)
         {
             if(!canMove(down, 2, x, y))
             {
-                //move up instead if possible
+                //move right instead if possible
                 if(canMove(right, 2, x, y))
                     walkDir = right;
+                //move left instead if possible
                 else if(canMove(left, 2, x, y))
                     walkDir = left;
             }
@@ -77,7 +83,8 @@ void MovingActor::getNewDirection(int x, int y)
     }
 }
 
-bool MovingActor::canMove(int dir, int dist, int x, int y)
+//returns true if actor can move dist pixels in direction dir from position x, y, false otherwise
+bool MovingActor::canMove(int dir, int dist, int x, int y) 
 {
     if(dir == left)
     {
@@ -106,6 +113,7 @@ bool MovingActor::canMove(int dir, int dist, int x, int y)
     }
 }
 
+//if walking direction is left, sprite direction is set to 180, otherwise sprite direction is set to 0
 void MovingActor::updateSpriteDirection()
 {
     if(walkDir == left)
@@ -132,6 +140,7 @@ int MovingActor::chooseRandomWalkDir()
     return possibleDirections[randDir];
 }
 
+//teleport actor to a random square, invalidates current walk direction to -1 and moves the player to new square
 void MovingActor::teleportToRandomSquare()
 {
     Actor* randSquare;
@@ -159,6 +168,7 @@ PlayerAvatar::PlayerAvatar(StudentWorld* sw, int imgID, int x, int y, int player
     stars = 0;
 }
 
+//deals with the frame-by-frame action of the player
 void PlayerAvatar::doSomething()
 {
     if(getState() == "waiting to roll")
@@ -168,13 +178,14 @@ void PlayerAvatar::doSomething()
             setWalkDir(chooseRandomWalkDir());
             updateSpriteDirection();
         }
-        if(!canMove(getWalkDir(), 2, getX(), getY()))
+        if(!canMove(getWalkDir(), 2, getX(), getY())) //if player is in a corner or cannot move in current direction
         {
             setWalkDir(chooseRandomWalkDir());
             updateSpriteDirection();
         }
         switch (getWorld()->getAction(playerNumber))
         {
+            //action is pressed to move character
             case ACTION_ROLL:
             {
                 int die_roll = randInt(1, 10);
@@ -183,10 +194,12 @@ void PlayerAvatar::doSomething()
                 setState("walking");
                 break;
             }
+            //action is pressed to fire vortex
             case ACTION_FIRE:
             {
                 if(hasVortex)
                 {
+                    //create new vortex object and add it to the vector in the StudentWorld class
                     Vortex* vortex = new Vortex(getWorld(), getX(), getY());
                     vortex->setWalkDir(getWalkDir());
                     getWorld()->addNewActor(vortex);
@@ -204,14 +217,18 @@ void PlayerAvatar::doSomething()
         if(getWorld()->getActorTypeAt(getX()/SPRITE_WIDTH, getY()/SPRITE_HEIGHT) != Board::up_dir_square && getWorld()->getActorTypeAt(getX()/SPRITE_WIDTH, getY()/SPRITE_HEIGHT) != Board::down_dir_square && getWorld()->getActorTypeAt(getX()/SPRITE_WIDTH, getY()/SPRITE_HEIGHT) != Board::left_dir_square && getWorld()->getActorTypeAt(getX()/SPRITE_WIDTH, getY()/SPRITE_HEIGHT) != Board::right_dir_square)
         {
             std::vector<int> possibleDirs = getWorld()->getValidDirsFromPos(getX(), getY());
+            
+            //player is at a fork
             if(possibleDirs.size() > 2)
             {
                 switch (getWorld()->getAction(playerNumber))
                 {
                     case ACTION_LEFT:
                     {
+                        //check if moving left is one of the possible actions
                         for(int i = 0; i < possibleDirs.size(); i++)
                         {
+                            //if the player can move left and wasn't previously moving right (so that the player doesn't do a 180 turn)
                             if(possibleDirs[i] == left && getWalkDir() != right)
                                 setWalkDir(left);
                         }
@@ -248,14 +265,14 @@ void PlayerAvatar::doSomething()
                         return;
                 }
             }
-            else
+            else //either continue in current direction or change direction if at a turn
                 getNewDirection(getX(), getY());
         }
 
-        updateSpriteDirection();
+        updateSpriteDirection(); //change direction sprite is facing
         
-        moveAtAngle(getWalkDir(), 2);
-        decTicksToMove();
+        moveAtAngle(getWalkDir(), 2); //move character 2 pixels
+        decTicksToMove(); //decrease ticks to move
        
         if(getTicksToMove() == 0)
         {
@@ -265,6 +282,7 @@ void PlayerAvatar::doSomething()
     }
 }
 
+//swaps position, ticks to move, walking direction, sprite direction, and states with other
 void PlayerAvatar::swapAttributesWithOther(PlayerAvatar* other)
 {
     //swap positions
@@ -294,6 +312,7 @@ void PlayerAvatar::swapAttributesWithOther(PlayerAvatar* other)
     other->setState(tempState);
 }
 
+//swap stars with player pointed to by playerPtr
 void PlayerAvatar::swapStars(PlayerAvatar* playerPtr)
 {
     int temp = getStars();
@@ -301,6 +320,7 @@ void PlayerAvatar::swapStars(PlayerAvatar* playerPtr)
     playerPtr->setStars(temp);
 }
 
+//swaps coins with player pointed to by playerPtr
 void PlayerAvatar::swapCoins(PlayerAvatar* playerPtr)
 {
     int temp = getCoins();
@@ -310,61 +330,72 @@ void PlayerAvatar::swapCoins(PlayerAvatar* playerPtr)
 
 Enemy::Enemy(StudentWorld* sw, int imgID, int x, int y):MovingActor(sw, imgID, x, y)
 {
-    travelDist = 0;
     pauseCounter = 180;
     setState("Paused");
     setPeachIsNew(true);
     setYoshiIsNew(true);
 }
 
+//deals with frame-by-frame movement of enemy
 void Enemy::doSomething()
 {
     if(getState() == "Paused")
     {
-        if(isOn(getWorld()->getPeach()->getX(), getWorld()->getPeach()->getY()))
+        if(getWorld()->getPeach()->getState() == "waiting to roll")
         {
-            if(isPeachNew())
+            if(isOn(getWorld()->getPeach()->getX(), getWorld()->getPeach()->getY()))
             {
-                doAction(getWorld()->getPeach());
-                setPeachIsNew(false);
+                if(isPeachNew())
+                {
+                    doAction(getWorld()->getPeach()); //call action specific to Bowser or Boo on Peach if Peach is in waiting to roll state and is on same square as the enemy
+                    setPeachIsNew(false); //set peach to not new
+                }
             }
+            else
+                setPeachIsNew(true); //peach is no longer on the same square as this enemy, so she is new
         }
-        else
-            setPeachIsNew(true);
         
-        if(isOn(getWorld()->getYoshi()->getX(), getWorld()->getYoshi()->getY()))
+        if(getWorld()->getYoshi()->getState() == "waiting to roll")
         {
-            if(isYoshiNew())
+            if(isOn(getWorld()->getYoshi()->getX(), getWorld()->getYoshi()->getY()))
             {
-                doAction(getWorld()->getYoshi());
-                setYoshiIsNew(false);
+                if(isYoshiNew())
+                {
+                    doAction(getWorld()->getYoshi());
+                    setYoshiIsNew(false);
+                }
             }
+            else
+                setYoshiIsNew(true);
         }
-        else
-            setYoshiIsNew(true);
         
         pauseCounter--;
         if(pauseCounter == 0)
         {
             int die_roll = randInt(1, 10);
             setTicksToMove(die_roll * 8);
+            
             std::vector<int> possibleDirs = getWorld()->getValidDirsFromPos(getX(), getY());
             int randDir = randInt(0, (int)possibleDirs.size() - 1);
-            setWalkDir(possibleDirs[randDir]);
+            setWalkDir(possibleDirs[randDir]); //choose new random direction for enemy to move
             updateSpriteDirection();
+            
             setState("Walking");
         }
     }
     if(getState() == "Walking")
     {
         std::vector<int> possibleDirs = getWorld()->getValidDirsFromPos(getX(), getY());
+        
+        //if enemy is at a fork
         if(possibleDirs.size() > 2)
         {
+            //choose a random direction to move
             int randDir = randInt(0, (int)possibleDirs.size() - 1);
             setWalkDir(possibleDirs[randDir]);
         }
         else if(!canMove(getWalkDir(), 2, getX(), getY()))
-            getNewDirection(getX(), getY());
+            getNewDirection(getX(), getY()); //either continue moving in same direction or turn at a corner
         
         updateSpriteDirection();
         moveAtAngle(getWalkDir(), 2);
@@ -373,10 +404,10 @@ void Enemy::doSomething()
         {
             setState("Paused");
             pauseCounter = 180;
-            if(canMakeDroppingSquare())
+            if(canMakeDroppingSquare()) //if enemy is Bowser (can make dropping squares)
             {
                 int randNum = randInt(1,4);
-                if(randNum == 1)
+                if(randNum == 1) //25% of making dropping square
                 {
                     getWorld()->replaceSquareWithDropping(getX(), getY());
                     getWorld()->playSound(SOUND_DROPPING_SQUARE_CREATED);
@@ -386,6 +417,7 @@ void Enemy::doSomething()
     }
 }
 
+//called when an enemy is impacted (teleport to random square)
 void Enemy::doImpactedAction()
 {
     teleportToRandomSquare();
@@ -400,11 +432,12 @@ Bowser::Bowser(StudentWorld* sw, int x, int y):Enemy(sw, IID_BOWSER, x, y)
     
 }
 
+//do Bowser specific action when Bowser runs into a player
 void Bowser::doAction(PlayerAvatar* playerPtr)
 {
     int randNum = randInt(1,2);
     
-    if(randNum == 1)
+    if(randNum == 1) //50% chance to set coins and stars of player to 0
     {
         playerPtr->setCoins(0);
         playerPtr->setStars(0);
@@ -417,23 +450,26 @@ Boo::Boo(StudentWorld* sw, int x, int y):Enemy(sw, IID_BOO, x, y)
     
 }
 
+//do Boo specific action when Boo runs into a player
 void Boo::doAction(PlayerAvatar* playerPtr)
 {
     int randNum = randInt(1,2);
     
-    if(randNum == 1)
+    if(randNum == 1) //50% chance to swap stars between the players
     {
         //is peach
         if(playerPtr->isPlayerOne())
             playerPtr->swapStars(getWorld()->getYoshi());
+        //is yoshi
         else
             playerPtr->swapStars(getWorld()->getPeach());
     }
-    else
+    else //50% chance to swap coins between the players
     {
         //is peach
         if(playerPtr->isPlayerOne())
             playerPtr->swapCoins(getWorld()->getYoshi());
+        //is yoshi
         else
             playerPtr->swapCoins(getWorld()->getPeach());
     }
@@ -445,6 +481,7 @@ Vortex::Vortex(StudentWorld* sw, int x, int y):MovingActor(sw, IID_VORTEX, x, y)
     
 }
 
+//do frame-by-frame action for vortex
 void Vortex::doSomething()
 {
     if(!isAlive())
@@ -458,11 +495,11 @@ void Vortex::doSomething()
         setIsAlive(false);
     
     Enemy* impactedActor = getWorld()->getOverlapEnemy(getX(), getY());
+    //if there is an enemy that this vortex currently overlaps
     if(impactedActor != nullptr)
     {
-        std::cerr << "hit impactable enemy" << std::endl;
-        impactedActor->doImpactedAction();
-        setIsAlive(false);
+        impactedActor->doImpactedAction(); //force impacted enemy to do impacted action
+        setIsAlive(false); //deactivate vortex
         getWorld()->playSound(SOUND_HIT_BY_VORTEX);
     }
 }
@@ -473,6 +510,7 @@ Square::Square(StudentWorld* sw, int imgID, int x, int y, int dir):Actor(sw, img
     setYoshiIsNew(false);
 }
 
+//check if peach or yoshi has walked onto the square and is new
 void Square::doSomething()
 {
     if(!isAlive())
@@ -511,6 +549,7 @@ CoinSquare::CoinSquare(StudentWorld* sw, int imgID, int x, int y, bool isBlue):S
         coinValue = -3;
 }
 
+//if player lands on this square, add or subtract 3 coins depending on the type of coin
 void CoinSquare::doAction(PlayerAvatar* playerPtr)
 {
     if(playerPtr->getState() == "waiting to roll")
@@ -534,6 +573,7 @@ StarSquare::StarSquare(StudentWorld* sw, int x, int y):Square(sw, IID_STAR_SQUAR
     
 }
 
+//if the player has less than 20 coins, return; otherwise, give the player 1 star in exchange for 20 coins
 void StarSquare::doAction(PlayerAvatar* playerPtr)
 {
     if(playerPtr->getCoins() < 20)
@@ -549,6 +589,7 @@ DirectionalSquare::DirectionalSquare(StudentWorld* sw, int x, int y, int dir):Sq
     forcingDir = dir;
 }
 
+//set moving direction of player to the forcing direction
 void DirectionalSquare::doAction(PlayerAvatar* playerPtr)
 {
     playerPtr->setWalkDir(forcingDir);
@@ -559,8 +600,10 @@ BankSquare::BankSquare(StudentWorld* sw, int x, int y):Square(sw, IID_BANK_SQUAR
     
 }
 
+//if player lands on this square, give the bank balance to the player; if the player moves over the square, subtract 5 coins from the player and place it into the bank
 void BankSquare::doAction(PlayerAvatar* playerPtr)
 {
+    //if player lands on the square
     if(playerPtr->getState() == "waiting to roll")
     {
         if(getWorld()->getBankBalance() > 0)
@@ -573,11 +616,13 @@ void BankSquare::doAction(PlayerAvatar* playerPtr)
     }
     else
     {
+        //if player has less than 5 coins, just give what the player has
         if(playerPtr->getCoins() < 5)
         {
             getWorld()->setBankBalance(getWorld()->getBankBalance() + playerPtr->getCoins());
             playerPtr->setCoins(0);
         }
+        //give 5 coins to the bank
         else
         {
             playerPtr->setCoins(playerPtr->getCoins()-5);
@@ -593,17 +638,17 @@ EventSquare::EventSquare(StudentWorld* sw, int x, int y):Square(sw, IID_EVENT_SQ
     
 }
 
+//if the player lands on an event square and
 void EventSquare::doAction(PlayerAvatar* playerPtr)
 {
     if(playerPtr->getState() == "waiting to roll")
     {
         int randAction = randInt(1,3);
-        //int randAction = 3;
+        //int randAction = 2;
         switch(randAction)
         {
             case 1:
             {
-                std::cerr << "teleport to random square" << std::endl;
                 playerPtr->teleportToRandomSquare();
                 getWorld()->playSound(SOUND_PLAYER_TELEPORT);
                 break;
@@ -622,7 +667,6 @@ void EventSquare::doAction(PlayerAvatar* playerPtr)
                     playerPtr->swapAttributesWithOther(getWorld()->getPeach());
                     setPeachIsNew(false);
                 }
-                std::cerr << "swap with other player" << std::endl;
                 getWorld()->playSound(SOUND_PLAYER_TELEPORT);
                 break;
             }
@@ -630,7 +674,6 @@ void EventSquare::doAction(PlayerAvatar* playerPtr)
             {
                 playerPtr->setHasVortex(true);
                 getWorld()->playSound(SOUND_GIVE_VORTEX);
-                std::cerr << "give vortex" << std::endl;
                 break;
             }
         }
@@ -642,20 +685,21 @@ DroppingSquare::DroppingSquare(StudentWorld* sw, int x, int y):Square(sw, IID_DR
     
 }
 
+//if player lands on a dropping square, either subtract 10 coins or subtract one star
 void DroppingSquare::doAction(PlayerAvatar* playerPtr)
 {
     if(playerPtr->getState() == "waiting to roll")
     {
         int randAction = randInt(1,2);
         
-        if(randAction == 1)
+        if(randAction == 1) //50% chance to remove 10 coins
         {
             playerPtr->setCoins(playerPtr->getCoins()-10);
             //if subtracted coins past 0
             if(playerPtr->getCoins() < 0)
                 playerPtr->setCoins(0);
         }
-        else
+        else //50% chance to remove 1 star
         {
             playerPtr->setStars(playerPtr->getStars()-1);
             //if subtracted stars past 0

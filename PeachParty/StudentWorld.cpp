@@ -25,6 +25,7 @@ StudentWorld::~StudentWorld()
     cleanUp();
 }
 
+//gets the board file to be played and loads it; returns board error if it cannot be loaded, otherwise it populates the board and starts the countdown timer
 int StudentWorld::init()
 {
     string boardFile = getBoardFile();
@@ -51,6 +52,7 @@ int StudentWorld::init()
     return GWSTATUS_CONTINUE_GAME;
 }
 
+//gets the board file name depending on which board was chosen
 string StudentWorld::getBoardFile()
 {
     Board bd;
@@ -107,6 +109,7 @@ string StudentWorld::getBoardFile()
     return board_file;
 }
 
+//creates the objects in the game and adds them to the vector actors
 void StudentWorld::populateBoard(Board bd)
 {
     for(int i = 0; i < BOARD_WIDTH; i++)
@@ -208,20 +211,27 @@ void StudentWorld::populateBoard(Board bd)
 
 int StudentWorld::move()
 {
+    //if game ended
     if (timeRemaining() <= 0)
     {
         playSound(SOUND_GAME_FINISHED);
         int winner = -1;
+        //if peach has more stars than yoshi -> peach wins
         if(peach->getStars() > yoshi->getStars())
             winner = 1;
+        //if yoshi has more stars than peach -> yoshi wins
         else if(peach->getStars() < yoshi->getStars())
             winner = 2;
+        //if equal stars
         else
         {
+            //if peach has more coins than yoshi -> peach wins
             if(peach->getCoins() > yoshi->getCoins())
                 winner = 1;
+            //if yoshi has more coins than peach -> yoshi wins
             else if(peach->getCoins() < yoshi->getCoins())
                 winner = 2;
+            //random winner
             else
                 winner = randInt(1,2);
         }
@@ -237,12 +247,14 @@ int StudentWorld::move()
         }
     }
     
+    //make all actors do something
     peach->doSomething();
     yoshi->doSomething();
     for(int i = 0; i < actors.size(); i++)
     {
         if(actors[i]->isAlive())
             actors[i]->doSomething();
+        //if actor is dead, remove it from actors and delete it
         else
         {
             delete actors[i];
@@ -255,6 +267,7 @@ int StudentWorld::move()
 	return GWSTATUS_CONTINUE_GAME;
 }
 
+//creates the game stat text shown at the top of the screen
 string StudentWorld::getGameText()
 {
     string gameText = "P1 Roll: ";
@@ -281,6 +294,7 @@ string StudentWorld::getGameText()
     return gameText;
 }
 
+//deletes all actors at end of the game
 void StudentWorld::cleanUp()
 {
     while(!actors.empty())
@@ -296,12 +310,14 @@ void StudentWorld::cleanUp()
     yoshi = nullptr;
 }
 
+//returns the grid entry for the contents at (x,y)
 Board::GridEntry StudentWorld::getActorTypeAt(int x, int y)
 {
     Board::GridEntry ge = board.getContentsOf(x, y);
     return ge;
 }
 
+//returns pointer to the actor at position (x,y) and its index in actors
 Actor* StudentWorld::getSquareActorAt(int x, int y, int& index)
 {
     for(int i = 0; i < actors.size(); i++)
@@ -316,6 +332,7 @@ Actor* StudentWorld::getSquareActorAt(int x, int y, int& index)
     return nullptr;
 }
 
+//returns vector of integers with the valid directions an actor can move from (x,y)
 vector<int> StudentWorld::getValidDirsFromPos(int x, int y)
 {
     vector<int> validDirs;
@@ -336,6 +353,7 @@ vector<int> StudentWorld::getValidDirsFromPos(int x, int y)
     return validDirs;
 }
 
+//chooses random square on the board and returns pointer to it
 Actor* StudentWorld::chooseRandomSquare() const
 {
     //loop until we get an actor that is a squareS
@@ -349,6 +367,7 @@ Actor* StudentWorld::chooseRandomSquare() const
     return nullptr;
 }
 
+//replaces square at (x,y) to a dropping square
 void StudentWorld::replaceSquareWithDropping(int x, int y)
 {
     int i = 0;
@@ -356,15 +375,13 @@ void StudentWorld::replaceSquareWithDropping(int x, int y)
     if(square != nullptr)
     {
         square->setIsAlive(false);
-      
-        //delete square;
-        //actors.erase(actors.begin() + i);
        
         square = new DroppingSquare(this, x, y);
         actors.push_back(square);
     }
 }
 
+//returns pointer to enemy that overlaps with a vortex at (x,y)
 Enemy* StudentWorld::getOverlapEnemy(int x, int y)
 {
     for(int i = 0; i < actors.size(); i++)
@@ -383,6 +400,7 @@ Enemy* StudentWorld::getOverlapEnemy(int x, int y)
     return nullptr;
 }
 
+//adds a new actor (the parameter) to actors
 void StudentWorld::addNewActor(Actor* actor)
 {
     actors.push_back(actor);

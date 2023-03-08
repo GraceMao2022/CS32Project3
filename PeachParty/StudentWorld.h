@@ -24,7 +24,7 @@ class StudentWorld : public GameWorld
         PlayerAvatar* getPeach() { return peach; }
         PlayerAvatar* getYoshi() { return yoshi; }
         std::vector<int> getValidDirsFromPos(int x, int y);
-        int getBankBalance() { return bankBalance; }
+        int getBankBalance() const { return bankBalance; }
         void setBankBalance(int amt) { bankBalance = amt; }
         Actor* chooseRandomSquare() const;
         void replaceSquareWithDropping(int x, int y);
@@ -33,14 +33,15 @@ class StudentWorld : public GameWorld
         void addNewActor(Actor* actor);
 
     private:
-    std::string getBoardFile();
-    void populateBoard(Board bd);
-    PlayerAvatar* peach;
-    PlayerAvatar* yoshi;
-    Board board;
-    std::vector<Actor*> actors;
-    Actor* getSquareActorAt(int x, int y, int& index);
-    int bankBalance;
+        PlayerAvatar* peach; //pointer to peach
+        PlayerAvatar* yoshi; //pointer to yoshi
+        Board board; //board that player is playing on
+        std::vector<Actor*> actors; //all other objects
+        int bankBalance; //bank balance
+    
+        std::string getBoardFile();
+        void populateBoard(Board bd);
+        Actor* getSquareActorAt(int x, int y, int& index);
 };
 
 #endif // STUDENTWORLD_H_

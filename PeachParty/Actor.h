@@ -10,32 +10,30 @@ class Actor: public GraphObject
 {
 public:
     Actor(StudentWorld* sw, int imgID, int x, int y, int dir, int depth, double size);
-    //virtual ~Actor(){}
     virtual void doSomething() = 0;
     void setIsAlive(bool isAlive) { alive = isAlive; }
     bool isAlive() const { return alive; }
     virtual bool isSquare() const = 0;
     virtual bool isImpactable() const = 0;
-    bool isOn(int x, int y);
-    bool isPeachNew() { return peachIsNew; }
+    bool isOn(int x, int y) const;
+    bool isPeachNew() const { return peachIsNew; }
     void setPeachIsNew(bool peachNew) { peachIsNew = peachNew; }
-    bool isYoshiNew() { return yoshiIsNew; }
+    bool isYoshiNew() const { return yoshiIsNew; }
     void setYoshiIsNew(bool yoshiNew) { yoshiIsNew = yoshiNew; }
     
 protected:
     StudentWorld* getWorld() { return m_world; }
 private:
-    StudentWorld* m_world;
-    bool alive;
-    bool peachIsNew;
-    bool yoshiIsNew;
+    StudentWorld* m_world; //pointer to world that actor is in
+    bool alive; //if actor is alive or not
+    bool peachIsNew; //if peach has not collided with this actor yet
+    bool yoshiIsNew; //if yoshi has not collided with this actor yet
 };
 
 class MovingActor: public Actor
 {
 public:
     MovingActor(StudentWorld* sw, int imgID, int x, int y);
-    //virtual ~MovingActor(){}
     std::string getState() const { return state; }
     void setWalkDir(int dir) { walkDir = dir; }
     bool isSquare() const { return false; }
@@ -51,16 +49,15 @@ protected:
     void updateSpriteDirection();
     int chooseRandomWalkDir();
 private:
-    int ticks_to_move;
-    int walkDir;
-    std::string state;
+    int ticks_to_move; //stores the ticks left for actor to move
+    int walkDir; //stores movement direction
+    std::string state; //stores current state of actor
 };
 
 class PlayerAvatar: public MovingActor
 {
 public:
     PlayerAvatar(StudentWorld* sw, int imgID, int x, int y, int playerNum);
-    //~PlayerAvatar(){}
     void doSomething();
     bool isPlayerOne() const { return playerNumber == 1; }
     int getCoins() const { return coins; }
@@ -71,14 +68,14 @@ public:
     void swapCoins(PlayerAvatar* playerPtr);
     void swapAttributesWithOther(PlayerAvatar* other);
     void setHasVortex(bool hasVor) { hasVortex = hasVor; }
-    bool playerHasVortex() { return hasVortex; }
+    bool playerHasVortex() const { return hasVortex; }
     bool isImpactable() const { return false; }
     
 private:
-    int playerNumber;
-    int coins;
-    int stars;
-    bool hasVortex;
+    int playerNumber; //player 1 = peach, player 2 = yoshi
+    int coins; //stores number of coins player has
+    int stars; //stores number of stars player has
+    bool hasVortex; //stores if player currently has vortex or not
 };
 
 class Enemy: public MovingActor
@@ -91,8 +88,7 @@ public:
     virtual bool canMakeDroppingSquare() const = 0;
     void doImpactedAction();
 private:
-    int travelDist;
-    int pauseCounter;
+    int pauseCounter; //counter that ticks down when enemy is paused
 };
 
 class Bowser: public Enemy
@@ -117,7 +113,6 @@ public:
     Vortex(StudentWorld* sw, int x, int y);
     bool isImpactable() const { return false; }
     void doSomething();
-private:
 };
 
 class Square: public Actor
@@ -129,65 +124,53 @@ protected:
     bool isSquare() const { return true; }
     virtual void doAction(PlayerAvatar* playerPtr) = 0;
     bool isImpactable() const { return false; }
-private:
 };
 
 class CoinSquare: public Square
 {
 public:
     CoinSquare(StudentWorld* sw, int imgID, int x, int y, bool isBlue);
-    //~CoinSquare(){}
     void doAction(PlayerAvatar* playerPtr);
 private:
-    int coinValue;
-    bool blue;
-    
+    int coinValue; //3 or -3 depending on the coin
+    bool blue; //true if coin is blue, false if red
 };
 
 class StarSquare: public Square
 {
 public:
     StarSquare(StudentWorld* sw, int x, int y);
-    //~StarSquare(){}
     void doAction(PlayerAvatar* playerPtr);
-private:
 };
 
 class DirectionalSquare: public Square
 {
 public:
     DirectionalSquare(StudentWorld* sw, int x, int y, int dir);
-   // ~DirectionalSquare(){}
     void doAction(PlayerAvatar* playerPtr);
 private:
-    int forcingDir;
+    int forcingDir; //direction to force the player
 };
 
 class BankSquare: public Square
 {
 public:
     BankSquare(StudentWorld* sw, int x, int y);
-    //~BankSquare(){}
     void doAction(PlayerAvatar* playerPtr);
-private:
 };
 
 class EventSquare: public Square
 {
 public:
     EventSquare(StudentWorld* sw, int x, int y);
-   // ~EventSquare(){}
     void doAction(PlayerAvatar* playerPtr);
-private:
 };
 
 class DroppingSquare: public Square
 {
 public:
     DroppingSquare(StudentWorld* sw, int x, int y);
-    //~DroppingSquare(){}
     void doAction(PlayerAvatar* playerPtr);
-private:
 };
 
 #endif // ACTOR_H_
